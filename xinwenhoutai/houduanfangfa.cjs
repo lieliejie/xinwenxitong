@@ -359,14 +359,20 @@ server.delete('/api/pinglun/:id', (req, res) => {
 // 前端请求 /zhanshidataList → /zhanshishuju
 // 前端请求 /rejectedList → /bohuishuju
 
+// 路由别名表
+const urlMap = {
+  '/zhanshidataList': '/zhanshishuju',
+  '/rejectedList': '/bohuishuju',
+  '/zhongzhuanshujuList': '/zhongzhuanshuju'
+}
+
 server.use((req, res, next) => {
-  console.log('🔍 请求路径:', req.url)
-  if (req.url === '/zhanshidataList' || req.url.startsWith('/zhanshidataList?')) {
-    req.url = req.url.replace('/zhanshidataList', '/zhanshishuju')
-    console.log('🔄 别名转发: ->', req.url)
-  } else if (req.url === '/rejectedList' || req.url.startsWith('/rejectedList?')) {
-    req.url = req.url.replace('/rejectedList', '/bohuishuju')
-    console.log('🔄 别名转发: ->', req.url)
+  for (const [from, to] of Object.entries(urlMap)) {
+    if (req.url === from || req.url.startsWith(from + '?')) {
+      req.url = req.url.replace(from, to)
+      console.log('🔄 别名转发: ' + from + ' -> ' + req.url)
+      break
+    }
   }
   next()
 })

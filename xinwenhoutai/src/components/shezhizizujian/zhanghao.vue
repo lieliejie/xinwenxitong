@@ -31,7 +31,7 @@
         <span class="arrow">></span>
       </router-link>
 
-      <div class="menu-item" @click="logout">
+      <div class="menu-item" @click="qiehuan">
         <div class="menu-left">
           <span class="icon">🔄</span>
           <span class="text">切换账号</span>
@@ -82,13 +82,20 @@ onMounted(async () => {
       if (avatar) {
         if (avatar.startsWith('data:')) userAvatar.value = avatar
         else if (avatar.startsWith('http')) userAvatar.value = avatar
-        else userAvatar.value = 'http://localhost:3000' + avatar
+        else userAvatar.value = avatar.startsWith('/') ? avatar : '/' + avatar
       }
     }
   } catch (err) {
     console.error('获取用户信息失败:', err)
   }
 })
+
+const qiehuan = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('isLogin')
+  localStorage.removeItem('userId')
+  router.push('/login')
+}
 
 const logout = () => {
   localStorage.removeItem('token')

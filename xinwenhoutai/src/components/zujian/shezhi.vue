@@ -64,23 +64,25 @@ const shezhiList = [
   max-width: 1200px;
   margin: 0 auto;
   padding: 25px 20px;
-  background: #f5f7fa;
+  background: var(--bg-color, #f5f7fa);
+  min-height: 100vh;
+  transition: background 0.3s;
 }
 
 .settings-card {
-  background: #ffffff;
+  background: var(--card-bg, #ffffff);
   border-radius: 20px;
   padding: 32px 24px;
   display: flex;
   align-items: center;
   gap: 20px;
   margin-bottom: 28px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow, 0 4px 15px rgba(0, 0, 0, 0.04));
   transition: all 0.25s ease;
 }
 .settings-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-hover, 0 6px 20px rgba(0, 0, 0, 0.06));
 }
 
 .header-box {
@@ -92,7 +94,7 @@ const shezhiList = [
 .icon-box {
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg, #07c160, #06b057);
+  background: var(--primary-gradient, linear-gradient(135deg, #07c160, #06b057));
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -100,26 +102,29 @@ const shezhiList = [
 }
 .icon-box .icon {
   font-size: 36px;
-  color: #fff;
+  color: var(--btn-text, #fff);
 }
 
 .header-info h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #121212;
+  color: var(--text-color, #121212);
   margin: 0 0 4px 0;
+  transition: color 0.3s;
 }
 .header-info p {
   font-size: 14px;
-  color: #888;
+  color: var(--text-secondary, #888);
   margin: 0;
+  transition: color 0.3s;
 }
 
 .menu-wrapper {
-  background: #fff;
+  background: var(--card-bg, #fff);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow, 0 4px 15px rgba(0, 0, 0, 0.04));
+  transition: background 0.3s, box-shadow 0.3s;
 }
 
 .menu-item {
@@ -128,7 +133,7 @@ const shezhiList = [
   align-items: center;
   padding: 20px 24px;
   font-size: 16px;
-  border-bottom: 1px solid #f2f2f2;
+  border-bottom: 1px solid var(--border-color, #f2f2f2);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -136,11 +141,11 @@ const shezhiList = [
   border-bottom: none;
 }
 .menu-item:active {
-  background: #f7f7f7;
+  background: var(--bg-color, #f7f7f7);
   transform: scale(0.98);
 }
 .menu-item:hover {
-  background: #fafafa;
+  background: var(--hover-bg, #fafafa);
   padding-left: 28px;
 }
 
@@ -155,12 +160,13 @@ const shezhiList = [
   text-align: center;
 }
 .text {
-  color: #222;
+  color: var(--text-color, #222);
   font-weight: 500;
+  transition: color 0.3s;
 }
 
 .arrow {
-  color: #ccc;
+  color: var(--text-muted, #ccc);
   font-size: 16px;
 }
 </style>

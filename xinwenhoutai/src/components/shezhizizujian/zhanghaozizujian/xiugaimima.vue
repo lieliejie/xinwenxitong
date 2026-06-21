@@ -18,11 +18,11 @@
         <label>原密码</label>
         <div class="input-box">
           <input
-            :type="showOld ? 'text' : 'password'"
-            v-model="oldPassword"
+            v-model="yuanmima"
+            :type="isyuanmima ? 'text' : 'password'"
             placeholder="请输入原密码"
           />
-          <span class="eye-icon" @click="showOld = !showOld">
+          <span class="eye-icon" @click="isyuanmima = !isyuanmima">
             <span class="eye-closed">👁</span>
           </span>
         </div>
@@ -32,11 +32,11 @@
         <label>新密码</label>
         <div class="input-box">
           <input
-            :type="showNew ? 'text' : 'password'"
-            v-model="newPassword"
+            v-model="xinmima"
+            :type="isxinmima ? 'text' : 'password'"
             placeholder="请输入新密码"
           />
-          <span class="eye-icon" @click="showNew = !showNew">
+          <span class="eye-icon" @click="isxinmima = !isxinmima">
             <span class="eye-closed">👁</span>
           </span>
         </div>
@@ -46,22 +46,22 @@
         <label>确认密码</label>
         <div class="input-box">
           <input
-            :type="showConfirm ? 'text' : 'password'"
-            v-model="confirmPassword"
+            v-model="querenmima"
+            :type="isquerenmima ? 'text' : 'password'"
             placeholder="请确认新密码"
           />
-          <span class="eye-icon" @click="showConfirm = !showConfirm">
+          <span class="eye-icon" @click="isquerenmima = !isquerenmima">
             <span class="eye-closed">👁</span>
           </span>
         </div>
       </div>
 
-      <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
-      <p v-if="successMsg" class="success-msg">{{ successMsg }}</p>
+      <p v-if="errorMsg" class="error-tip">{{ errorMsg }}</p>
+      <p v-if="successMsg" class="success-tip">{{ successMsg }}</p>
 
-      <div class="btn-group">
-        <button class="btn save-btn" @click="changePassword">保存修改</button>
-        <button class="btn back-btn" @click="router.back()">返回</button>
+      <div class="button">
+        <button class="btn save" :disabled="baocunzhong" @click="baocun">{{ baocunzhong ? '保存中...' : '保存修改' }}</button>
+        <button class="btn back" @click="router.back()">返回</button>
       </div>
     </div>
   </div>
@@ -72,45 +72,51 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { http } from '../../fengzhuang/axios.ts'
 
-const router = useRouter()
+let router = useRouter()
+let yuanmima = ref('')
+let xinmima = ref('')
+let querenmima = ref('')
+let baocunzhong = ref(false)
+let isyuanmima = ref(false)
+let isxinmima = ref(false)
+let isquerenmima = ref(false)
+let errorMsg = ref('')
+let successMsg = ref('')
 
-const oldPassword = ref('')
-const newPassword = ref('')
-const confirmPassword = ref('')
-const showOld = ref(false)
-const showNew = ref(false)
-const showConfirm = ref(false)
-const errorMsg = ref('')
-const successMsg = ref('')
-
-const changePassword = async () => {
+let baocun = async () => {
+  baocunzhong.value = true
   errorMsg.value = ''
   successMsg.value = ''
-
-  if (!oldPassword.value || !newPassword.value || !confirmPassword.value) {
-    errorMsg.value = '请填写所有密码字段'
+  if (!yuanmima.value || !xinmima.value || !querenmima.value) {
+    errorMsg.value = '请填写完整'
+    baocunzhong.value = false
     return
   }
-  if (newPassword.value !== confirmPassword.value) {
-    errorMsg.value = '两次输入的新密码不一致'
+  if (xinmima.value !== querenmima.value) {
+    errorMsg.value = '确认密码不一致'
+    baocunzhong.value = false
     return
   }
-  if (newPassword.value.length < 6) {
+  if (xinmima.value.length < 6) {
     errorMsg.value = '新密码长度不能少于6位'
+    baocunzhong.value = false
     return
   }
-
   try {
+    const userId = localStorage.getItem('userId')
     await http.post('/api/change-password', {
-      oldPassword: oldPassword.value,
-      newPassword: newPassword.value
+      userId: Number(userId),
+      oldPassword: yuanmima.value,
+      newPassword: xinmima.value
     })
     successMsg.value = '密码修改成功'
-    oldPassword.value = ''
-    newPassword.value = ''
-    confirmPassword.value = ''
-  } catch (err) {
-    errorMsg.value = err.response?.data?.message || '密码修改失败，请检查原密码是否正确'
+    yuanmima.value = ''
+    xinmima.value = ''
+    querenmima.value = ''
+  } catch (error) {
+    errorMsg.value = error.response?.data?.message || '修改密码失败'
+  } finally {
+    baocunzhong.value = false
   }
 }
 </script>
@@ -181,13 +187,10 @@ const changePassword = async () => {
   font-size: 20px;
   margin: 0 0 4px;
   color: var(--text-color, #121212);
-  transition: color 0.3s;
 }
 .header-info p {
   font-size: 14px;
   color: var(--text-secondary, #888);
-  margin: 0;
-  transition: color 0.3s;
 }
 
 .form-wrapper {
@@ -195,21 +198,19 @@ const changePassword = async () => {
   border-radius: 20px;
   padding: 32px 40px;
   box-shadow: var(--shadow, 0 4px 15px rgba(0, 0, 0, 0.04));
+  transition: background 0.3s, box-shadow 0.3s;
   max-width: 500px;
   margin: 0 auto;
-  transition: background 0.3s, box-shadow 0.3s;
 }
 
 .input-item {
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 .input-item label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-size: 14px;
-  font-weight: 500;
   color: var(--text-color, #222);
-  transition: color 0.3s;
 }
 
 .input-box {
@@ -218,28 +219,35 @@ const changePassword = async () => {
 }
 .input-box input {
   width: 100%;
-  height: 46px;
-  padding: 0 44px 0 14px;
+  height: 44px;
+  padding: 0 40px 0 12px;
   border: 1px solid var(--input-border, #ddd);
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 15px;
+  box-sizing: border-box;
   background: var(--input-bg, #fff);
   color: var(--text-color, #222);
-  box-sizing: border-box;
-  outline: none;
-  transition: border-color 0.2s, background 0.3s, color 0.3s;
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
 }
 .input-box input:focus {
   border-color: #07c160;
   box-shadow: 0 0 0 3px rgba(7, 193, 96, 0.1);
+  outline: none;
 }
-.input-box input::placeholder {
-  color: var(--text-muted, #999);
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
 }
 
 .eye-icon {
   position: absolute;
-  right: 12px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
@@ -249,9 +257,8 @@ const changePassword = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  transition: color 0.2s;
+  width: 22px;
+  height: 22px;
 }
 .eye-icon:hover {
   color: var(--text-secondary, #666);
@@ -274,44 +281,40 @@ const changePassword = async () => {
   border-radius: 1px;
 }
 
-.error-msg {
-  color: #f56c6c;
-  font-size: 14px;
-  margin: 8px 0;
-}
-.success-msg {
-  color: #07c160;
-  font-size: 14px;
-  margin: 8px 0;
-}
-
-.btn-group {
-  margin-top: 30px;
-  display: flex;
-  gap: 14px;
-}
-
 .btn {
-  flex: 1;
+  width: 100px;
   height: 46px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 15px;
+  margin-top: 10px;
   border: none;
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
 }
-.btn:hover {
-  opacity: 0.85;
-  transform: translateY(-1px);
+.button {
+  display: flex;
+  gap: 30px;
 }
-
-.save-btn {
-  background: linear-gradient(135deg, #07c160, #06b057);
-  color: #fff;
+.save {
+  background: var(--primary-color, #07c160);
+  color: var(--btn-text, #fff);
 }
-.back-btn {
+.save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.back {
   background: var(--btn-gray, #f2f2f2);
   color: var(--btn-gray-text, #666);
+}
+
+.error-tip {
+  color: var(--danger-color, #f56c6c);
+  font-size: 13px;
+  margin: 8px 0 0 0;
+}
+.success-tip {
+  color: #07c160;
+  font-size: 13px;
+  margin: 8px 0 0 0;
 }
 </style>

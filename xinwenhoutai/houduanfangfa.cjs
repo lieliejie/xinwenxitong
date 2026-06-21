@@ -360,16 +360,18 @@ server.delete('/api/pinglun/:id', (req, res) => {
 // 前端请求 /rejectedList → /bohuishuju
 
 server.use((req, res, next) => {
-  if (req.path.startsWith('/zhanshidataList')) {
-    req.url = '/zhanshishuju' + req.url.slice('/zhanshidataList'.length)
-  } else if (req.path.startsWith('/rejectedList')) {
-    req.url = '/bohuishuju' + req.url.slice('/rejectedList'.length)
+  console.log('🔍 请求路径:', req.url)
+  if (req.url === '/zhanshidataList' || req.url.startsWith('/zhanshidataList?')) {
+    req.url = req.url.replace('/zhanshidataList', '/zhanshishuju')
+    console.log('🔄 别名转发: ->', req.url)
+  } else if (req.url === '/rejectedList' || req.url.startsWith('/rejectedList?')) {
+    req.url = req.url.replace('/rejectedList', '/bohuishuju')
+    console.log('🔄 别名转发: ->', req.url)
   }
   next()
 })
 
 // ================= 其他请求走 json-server =================
-server.use('/api', router)
 server.use(router)
 
 const PORT = process.env.PORT || 3000

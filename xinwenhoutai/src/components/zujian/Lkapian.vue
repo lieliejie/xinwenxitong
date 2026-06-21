@@ -117,25 +117,56 @@ const recentNews = ref([])
 // 热门新闻TOP5
 const hotNews = ref([])
 
-// 从数据库获取数据
+// 从数据库获取数据（兼容 Railway 旧版后端：多 API 并行拼接）
 const fetchData = async () => {
   loading.value = true
   loadError.value = false
   try {
-    const res = await http.get('/api/tongji-data')
-    if (res.data && res.data.code === 200) {
-      const d = res.data.data
-      stats.value = {
-        totalNews: d.totalNews || 0,
-        todayPublished: d.todayPublished || 0,
-        pendingReview: d.pendingReview || 0,
-        totalViews: d.totalViews || 0
-      }
-      recentNews.value = d.recentNews || []
-      hotNews.value = d.hotNews || []
-    } else {
-      loadError.value = true
+    // 并行请求所有可用 API（axios 自动带 token，登录后均可访问）
+    const [homeRes, zhanshiRes, zhongzhuanRes, bohuiRes] = await Promise.all([
+      http.get('/api/home-stats'),
+      http.get('/zhanshidataList'),
+      http.get('/zhongzhuandataList'),
+      http.get('/rejectedList')
+    ])
+
+    const homeData = homeRes.data?.data || {}
+    const zhanshiList = Array.isArray(zhanshiRes.data) ? zhanshiRes.data : []
+    const zhongzhuanList = Array.isArray(zhongzhuanRes.data) ? zhongzhuanRes.data : []
+    const bohuiList = Array.isArray(bohuiRes.data) ? bohuiRes.data : []
+    const allNews = [...zhanshiList, ...zhongzhuanList, ...bohuiList]
+
+    // 4 张统计卡片
+    const today = new Date().toISOString().split('T')[0]
+    stats.value = {
+      totalNews: homeData.publishedCount || zhanshiList.length || 0,
+      todayPublished: zhanshiList.filter(item => item.riQi === today).length,
+      pendingReview: zhongzhuanList.length,
+      totalViews: allNews.reduce((sum, item) => sum + (item.yueduLiang || 0), 0)
     }
+
+    // 最近发布 TOP5（按日期倒序）
+    recentNews.value = zhanshiList
+      .sort((a, b) => new Date(b.riQi) - new Date(a.riQi))
+      .slice(0, 5)
+      .map(item => ({
+        id: item.id,
+        title: item.biaoTi,
+        author: item.laiYuan,
+        date: item.riQi,
+        status: '已发布'
+      }))
+
+    // 热门新闻 TOP5（按阅读量降序）
+    hotNews.value = allNews
+      .sort((a, b) => (b.yueduLiang || 0) - (a.yueduLiang || 0))
+      .slice(0, 5)
+      .map(item => ({
+        id: item.id,
+        title: item.biaoTi,
+        views: item.yueduLiang || 0
+      }))
+
   } catch (err) {
     console.error('获取统计页面数据失败:', err)
     loadError.value = true

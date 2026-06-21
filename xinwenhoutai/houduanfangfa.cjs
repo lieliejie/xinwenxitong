@@ -567,6 +567,7 @@ server.use((req, res, next) => {
 // ================= 其他请求走 json-server =================
 server.use(router)
 
+// 修复：API请求放行 + SPA fallback 排除/api/和/uploads/路径
 const PORT = process.env.PORT || 3000
 server.listen(PORT, '0.0.0.0', () => {
   console.log('✅ 后端已启动：http://localhost:' + PORT)

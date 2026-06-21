@@ -2,6 +2,7 @@
   "name": "xinwenxitong",
   "version": "1.0.0",
   "scripts": {
+    "postinstall": "cd xinwenhoutai && npm install",
     "start": "cd xinwenhoutai && node houduanfangfa.cjs"
   }
 }

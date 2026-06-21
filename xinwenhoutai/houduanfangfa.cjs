@@ -118,7 +118,7 @@ server.get('/', (req, res) => {
 // ================= 收 token 并验证的中间件 =================
 server.use((req, res, next) => {
   // 放行：静态文件、登录注册、上传、评论等公开接口
-  if (req.path === '/api/login' || req.path === '/api/register' || req.path === '/api/upload-avatar' || req.path === '/api/upload-tupian' || req.path.startsWith('/uploads/') || req.path === '/api/dianzan' || req.path === '/api/shoucang' || req.path === '/api/dianzan-status' || req.path === '/api/shoucang-status' || req.path === '/api/pinglun' || req.path.startsWith('/api/pinglun/') || req.path === '/api/home-stats' || req.path === '/api/tongji-data' || req.path.startsWith('/qiantai') || req.path.startsWith('/houtai') || req.path === '/' || req.path.endsWith('.js') || req.path.endsWith('.css') || req.path.endsWith('.html') || req.path.endsWith('.png') || req.path.endsWith('.jpg') || req.path.endsWith('.svg') || req.path.endsWith('.ico') || req.path.endsWith('.woff') || req.path.endsWith('.woff2')) {
+  if (req.path === '/api/login' || req.path === '/api/register' || req.path === '/api/upload-avatar' || req.path === '/api/upload-tupian' || req.path.startsWith('/uploads/') || req.path === '/api/dianzan' || req.path === '/api/shoucang' || req.path === '/api/dianzan-status' || req.path === '/api/shoucang-status' || req.path === '/api/pinglun' || req.path.startsWith('/api/pinglun/') || req.path === '/api/home-stats' || req.path === '/api/tongji-data' || req.path === '/api/news-detail' || req.path.startsWith('/qiantai') || req.path.startsWith('/houtai') || req.path === '/' || req.path.endsWith('.js') || req.path.endsWith('.css') || req.path.endsWith('.html') || req.path.endsWith('.png') || req.path.endsWith('.jpg') || req.path.endsWith('.svg') || req.path.endsWith('.ico') || req.path.endsWith('.woff') || req.path.endsWith('.woff2')) {
     return next()
   }
 
@@ -421,8 +421,9 @@ server.get('/api/home-stats', (req, res) => {
     const zhongzhuan = router.db.get('zhongzhuanshuju').value() || []
     const bohui = router.db.get('bohuishuju').value() || []
 
-    // 计算总阅读量
-    const totalViews = zhongzhuan.reduce((sum, item) => sum + (item.yueduLiang || 0), 0)
+    // 计算总阅读量（三个表合并）
+    const allNews = [...zhongzhuan, ...news, ...bohui]
+    const totalViews = allNews.reduce((sum, item) => sum + (item.yueduLiang || 0), 0)
 
     res.json({
       code: 200,
@@ -436,6 +437,35 @@ server.get('/api/home-stats', (req, res) => {
     })
   } catch (err) {
     console.error('获取统计数据失败:', err)
+    res.status(500).json({ code: 500, message: '服务器内部错误' })
+  }
+})
+
+// ================= 新闻详情查询接口 =================
+server.get('/api/news-detail', (req, res) => {
+  try {
+    const { id } = req.query
+    if (!id) {
+      return res.status(400).json({ code: 400, message: '缺少新闻 id' })
+    }
+
+    // 在三个表中查找
+    const zhanshi = router.db.get('zhanshishuju').find({ id }).value()
+    const zhongzhuan = router.db.get('zhongzhuanshuju').find({ id }).value()
+    const bohui = router.db.get('bohuishuju').find({ id }).value()
+
+    const news = zhanshi || zhongzhuan || bohui
+
+    if (!news) {
+      return res.status(404).json({ code: 404, message: '新闻不存在' })
+    }
+
+    res.json({
+      code: 200,
+      data: news
+    })
+  } catch (err) {
+    console.error('获取新闻详情失败:', err)
     res.status(500).json({ code: 500, message: '服务器内部错误' })
   }
 })

@@ -18,6 +18,7 @@ const router = createRouter({
    children: [
   { path: 'shouye', component: () => import('../zujian/Lshouye.vue') },
   { path: 'tongji', component: () => import('../zujian/Lkapian.vue') }, 
+  { path: 'newsdetail/:id', component: () => import('../zujian/Lxinwenxiangqing.vue') },
   { path: 'users', component: () => import('../zujian/Lbiaoge.vue') }, 
   { path: 'news', component: () => import('../zujian/Lxinwenkapian.vue') }, 
   { path: 'shezhi', component: () => import('../zujian/shezhi.vue') },

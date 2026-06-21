@@ -57,7 +57,7 @@
           <span class="section-more" @click="goToRoute('/news')">查看全部 →</span>
         </div>
         <div class="news-list">
-          <div v-for="item in recentNews" :key="item.id" class="news-item">
+          <div v-for="item in recentNews" :key="item.id" class="news-item" @click="goToDetail(item.id)">
             <div class="news-title">{{ item.title }}</div>
             <div class="news-meta">
               <span class="meta-item">📝 {{ item.author }}</span>
@@ -76,7 +76,7 @@
           <span class="section-more" @click="goToRoute('/news')">查看排行 →</span>
         </div>
         <div class="hot-list">
-          <div v-for="(item, index) in hotNews" :key="item.id" class="hot-item">
+          <div v-for="(item, index) in hotNews" :key="item.id" class="hot-item" @click="goToDetail(item.id)">
             <span class="hot-rank" :class="'rank-' + (index + 1)">{{ index + 1 }}</span>
             <div class="hot-content">
               <div class="hot-title">{{ item.title }}</div>
@@ -109,6 +109,13 @@ const formatNum = (n: number): string => {
 const goToRoute = (path: string) => {
   if (path) {
     router.push(path)
+  }
+}
+
+// 跳转到新闻详情页
+const goToDetail = (id: string) => {
+  if (id) {
+    router.push('/newsdetail/' + id)
   }
 }
 
@@ -293,6 +300,12 @@ a{
 .news-item {
   padding: 10px 0;
   border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.news-item:hover {
+  background: #f9fdf9;
+  padding-left: 6px;
 }
 
 .news-item:last-child {
@@ -346,6 +359,13 @@ a{
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  padding: 4px 0;
+}
+.hot-item:hover {
+  background: #f9fdf9;
+  padding-left: 6px;
 }
 
 .hot-rank {

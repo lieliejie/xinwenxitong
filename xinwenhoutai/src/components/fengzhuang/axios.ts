@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const http = axios.create({
-  baseURL: import.meta.env.PROD ? '/houtai' : '',
+  baseURL: '',
   timeout: 5000
 });
 

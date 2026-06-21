@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "cd .. && bash render-build.sh",
+    "build": "vite build",
     "preview": "vite preview",
     "start": "node houduanfangfa.cjs"
   },

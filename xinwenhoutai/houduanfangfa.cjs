@@ -4,6 +4,7 @@ const path = require('path')
 
 const server = jsonServer.create()
 
+// 兼容 Railway：从根目录运行时，__dirname 指向 xinwenhoutai/
 const dbsPath = path.join(__dirname, 'dbs.json')
 const router = jsonServer.router(dbsPath)
 

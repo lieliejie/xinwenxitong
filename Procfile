@@ -1,1 +1,1 @@
-web: cd xinwenhoutai && node houduanfangfa.cjs
+web: node xinwenhoutai/houduanfangfa.cjs

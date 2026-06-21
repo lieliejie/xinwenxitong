@@ -363,7 +363,7 @@ server.delete('/api/pinglun/:id', (req, res) => {
 const urlMap = {
   '/zhanshidataList': '/zhanshishuju',
   '/rejectedList': '/bohuishuju',
-  '/zhongzhuanshujuList': '/zhongzhuanshuju'
+  '/zhongzhuandataList': '/zhongzhuanshuju'
 }
 
 server.use((req, res, next) => {

@@ -80,14 +80,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { http } from '../fengzhuang/axios.ts'
 
 const route = useRoute()
 const router = useRouter()
 
-const newsId = route.params.id
+const newsId = computed(() => route.params.id)
 
 const news = reactive({
   biaoTi: '',
@@ -133,7 +133,13 @@ const fetchDetail = async () => {
   loading.value = true
   loadError.value = false
   try {
-    const res = await http.get('/api/news-detail', { params: { id: newsId } })
+    const id = String(newsId.value || '')
+    if (!id) {
+      loadError.value = true
+      errorMsg.value = '缺少新闻标识符，无法加载详情'
+      return
+    }
+    const res = await http.get('/api/news-detail', { params: { id } })
     if (res.data && res.data.code === 200) {
       const d = res.data.data
       news.biaoTi = d.biaoTi || ''
@@ -158,8 +164,14 @@ const fetchDetail = async () => {
   }
 }
 
+watch(newsId, (newId) => {
+  if (newId) {
+    fetchDetail()
+  }
+})
+
 onMounted(() => {
-  if (!newsId) {
+  if (!newsId.value) {
     loadError.value = true
     errorMsg.value = '缺少新闻标识符，无法加载详情'
     loading.value = false

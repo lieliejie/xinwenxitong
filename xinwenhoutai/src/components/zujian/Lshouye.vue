@@ -64,10 +64,10 @@
     <div class="notice-section">
       <div class="notice-header">
         <span class="notice-title">系统公告</span>
-        <span class="notice-more">查看全部</span>
+        <span class="notice-more" @click="goToRoute('/tongji')">查看全部</span>
       </div>
       <div class="notice-list">
-        <div class="notice-item" v-for="item in notices" :key="item.id">
+        <div class="notice-item" v-for="item in notices" :key="item.id" @click="goToRoute('/tongji')">
           <span class="notice-dot"></span>
           <span class="notice-text">{{ item.title }}</span>
           <span class="notice-time">{{ item.time }}</span>
@@ -372,6 +372,11 @@ const notices = ref([
   gap: 10px;
   padding: 8px 0;
   border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.notice-item:hover {
+  background: #f9fdf9;
 }
 
 .notice-item:last-child {

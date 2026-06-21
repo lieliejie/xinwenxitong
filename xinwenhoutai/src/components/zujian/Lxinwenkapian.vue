@@ -27,8 +27,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in store.dataList" :key="item.id">
-              <td v-if="store.isMultiSelect" class="checkbox-col">
+            <tr v-for="item in store.dataList" :key="item.id" class="table-row" @click="goToDetail(item.id)">
+              <td v-if="store.isMultiSelect" class="checkbox-col" @click.stop>
                 <input type="checkbox" 
                 style="width: 16px; 
                 height: 16px; 
@@ -46,7 +46,7 @@
               <td class="col-width">
                 <span class="tag top">{{ item.isshenhe ? '已审核' : '待审核' }}</span>
               </td>
-              <td class="operate-col">
+              <td class="operate-col" @click.stop>
                 <span class="operate edit" @click="fabu(item)" v-if="item.isPublish">发布</span>
                 <span class="operate delete" @click="bohui(item)" v-if="item.isReject">驳回</span>
                 <span class="operate delete" @click="del(item)" v-if="item.isdel">删除</span>
@@ -67,6 +67,7 @@
 
   <script setup>
   import { computed } from 'vue';
+  import { useRouter } from 'vue-router';
   import useStore from '../pinia';
   import piliangbohui from '../tanchuzujian/piliangbohui.vue';
   import xinzeng from '../tanchuzujian/xinzeng.vue';
@@ -77,6 +78,7 @@
   import dpiliangfabu from '../tanchuzujian/dpiliangfabu.vue';
   
   let store = useStore();
+  const router = useRouter();
   
   const biaoTi = computed(() => {
     const tong = {};
@@ -170,6 +172,12 @@ let piliangbohuiff = () => {
   const handleAdd = () => {
     store.isAdd = true;
   };
+
+  const goToDetail = (id: string) => {
+    if (id) {
+      router.push('/newsdetail/' + id)
+    }
+  }
   </script>
 
   <style scoped>
@@ -252,6 +260,10 @@ let piliangbohuiff = () => {
 
   tbody tr {
     border-bottom: 1px solid #eee;
+  }
+  .table-row {
+    cursor: pointer;
+    transition: background 0.15s ease;
   }
   tbody tr:hover {
     background-color: #fafafa;

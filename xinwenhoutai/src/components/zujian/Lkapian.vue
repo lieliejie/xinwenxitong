@@ -112,10 +112,10 @@ const goToRoute = (path: string) => {
   }
 }
 
-// 跳转到新闻详情页
+// 路由跳转到新闻详情页，并携带新闻唯一标识符
 const goToDetail = (id: string) => {
   if (id) {
-    router.push('/newsdetail/' + id)
+    router.push({ name: 'newsdetail', params: { id } })
   }
 }
 

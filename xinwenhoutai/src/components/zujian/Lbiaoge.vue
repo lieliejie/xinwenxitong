@@ -22,7 +22,7 @@
             <span class="status active">正常</span>
           </td>
           <td>
-            <span class="operate green">编辑</span>
+            <span class="operate green" @click="bianji(user)">编辑</span>
             <span class="operate red" @click="shanchu(user.id)">删除</span>
           </td>
         </tr>
@@ -33,7 +33,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { http } from '../fengzhuang/axios'
+
+const router = useRouter()
 
 const userList = ref([])
 
@@ -44,6 +47,11 @@ const fetchUsers = async () => {
   } catch (err) {
     console.error('获取用户列表失败', err)
   }
+}
+
+const bianji = (user: any) => {
+  // 跳转到用户编辑页面（可通过路由参数传递用户 ID）
+  router.push('/zhanghao')
 }
 
 const shanchu = async (id) => {

@@ -1,0 +1,78 @@
+/* ========== 亮色主题（默认） ========== */
+:root {
+  --bg-color: #f5f7fa;
+  --card-bg: #ffffff;
+  --text-color: #1a1a1a;
+  --text-secondary: #666;
+  --text-muted: #999;
+  --border-color: #e8e8e8;
+  --input-bg: #ffffff;
+  --input-border: #ddd;
+  --shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.08);
+  --btn-gray: #f2f2f2;
+  --btn-gray-text: #666;
+  --hover-bg: #f5f5f5;
+  --tag-bg: #f5f8f5;
+  /* 品牌色（主题色） */
+  --primary-color: #07c160;
+  --primary-hover: #06ad56;
+  --primary-disabled: #a0d4b0;
+  --primary-gradient: linear-gradient(135deg, #07c160, #06b057);
+  /* 功能色 */
+  --danger-color: #f56c6c;
+  --warning-color: #fa8c16;
+  --info-color: #1890ff;
+  --warning-bg: linear-gradient(135deg, #fffaf0, #fff7e6);
+  /* 排行榜色 */
+  --rank-1: #e6162d;
+  --rank-2: #ff6b35;
+  --rank-3: #ffa940;
+  /* 按钮文字 */
+  --btn-text: #ffffff;
+}
+
+/* ========== 暗色主题（微信风格护眼深色） ========== */
+[data-theme='dark'] {
+  --bg-color: #191919;
+  --card-bg: #202020;
+  --text-color: #e5e5e5;
+  --text-secondary: #b0b0b0;
+  --text-muted: #808080;
+  --border-color: #2c2c2c;
+  --input-bg: #1e1e1e;
+  --input-border: #3a3a3a;
+  --shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.5);
+  --btn-gray: #2c2c2c;
+  --btn-gray-text: #b0b0b0;
+  --hover-bg: #2a2a2a;
+  --tag-bg: #2a2a2a;
+  --primary-color: #07c160;
+  --primary-hover: #06ad56;
+  --primary-disabled: #1a3a2a;
+  --primary-gradient: linear-gradient(135deg, #07c160, #06b057);
+  --danger-color: #e04848;
+  --warning-color: #e89020;
+  --info-color: #409eff;
+  --warning-bg: linear-gradient(135deg, #2a2418, #1f1a10);
+  --rank-1: #e6162d;
+  --rank-2: #ff6b35;
+  --rank-3: #ffa940;
+  --btn-text: #ffffff;
+}
+
+/* ========== 全局应用变量 ========== */
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+  transition: background 0.3s, color 0.3s;
+}
+
+/* 全局 input/textarea 默认样式 */
+input, textarea, select {
+  background: var(--input-bg);
+  color: var(--text-color);
+  border-color: var(--input-border);
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}

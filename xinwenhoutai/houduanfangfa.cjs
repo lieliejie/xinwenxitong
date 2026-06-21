@@ -31,107 +31,14 @@ server.use('/uploads', (req, res, next) => {
 })
 server.use('/uploads', require('express').static(uploadDir))
 
-// ================= 托管后台管理前端 (构建后的 dist 目录) =================
-const houtaiDist = path.join(__dirname, 'dist')
-console.log('📁 __dirname =', __dirname)
-console.log('📁 houtaiDist =', houtaiDist)
-if (fs.existsSync(houtaiDist)) {
-  const assetsDir = path.join(houtaiDist, 'assets')
-  const assetsCount = fs.existsSync(assetsDir) ? fs.readdirSync(assetsDir).length : 0
-  console.log('✅ 后台 dist 目录存在，assets 文件数: ' + assetsCount)
-  // 列出 dist 目录内容
-  console.log('📂 dist 内容:', fs.readdirSync(houtaiDist).join(', '))
-  if (fs.existsSync(assetsDir)) {
-    console.log('📂 dist/assets 内容:', fs.readdirSync(assetsDir).join(', '))
-  }
-
-  // 先注册静态文件中间件
-  server.use('/houtai', require('express').static(houtaiDist, {
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.js')) {
-        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
-      } else if (filePath.endsWith('.mjs')) {
-        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
-      } else if (filePath.endsWith('.css')) {
-        res.setHeader('Content-Type', 'text/css; charset=utf-8')
-      }
-    }
-  }))
-
-  // SPA fallback：只有请求路径对应不到静态文件时才返回 index.html
-  server.use('/houtai', (req, res, next) => {
-    // 排除 assets 和明确的静态文件请求（它们由 express.static 处理，不存在就 404）
-    const reqPath = req.path.replace(/^\/houtai/, '') || '/'
-    // 如果是 assets 目录下的文件，express.static 找不到就让它 404，不要 fallback
-    if (reqPath.startsWith('/assets/')) {
-      // express.static 没处理说明文件不存在，返回 404
-      return res.status(404).send('Not Found')
-    }
-    // 如果是 API 请求，放行给后面的 json-server 处理
-    if (reqPath.startsWith('/api/')) {
-      return next()
-    }
-    // 如果是 uploads 请求，放行
-    if (reqPath.startsWith('/uploads/')) {
-      return next()
-    }
-    // 其他路径（SPA 路由），返回 index.html
-    const indexPath = path.join(houtaiDist, 'index.html')
-    if (fs.existsSync(indexPath)) {
-      res.sendFile(indexPath)
-    } else {
-      next()
-    }
-  })
-} else {
-  console.log('❌ 后台 dist 目录不存在! 路径:', houtaiDist)
-  console.log('📂 当前目录内容:', fs.readdirSync(__dirname).join(', '))
-}
-
-// ================= 托管前台展示前端 =================
-const qiantaiDist = path.join(__dirname, 'qiantai-dist')
-if (fs.existsSync(qiantaiDist)) {
-  server.use('/qiantai', require('express').static(qiantaiDist, {
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.js')) {
-        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
-      } else if (filePath.endsWith('.mjs')) {
-        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
-      } else if (filePath.endsWith('.css')) {
-        res.setHeader('Content-Type', 'text/css; charset=utf-8')
-      }
-    }
-  }))
-  server.use('/qiantai', (req, res, next) => {
-    const reqPath = req.path.replace(/^\/qiantai/, '') || '/'
-    if (reqPath.startsWith('/assets/')) {
-      return res.status(404).send('Not Found')
-    }
-    // 如果是 API 请求，放行给后面的 json-server 处理
-    if (reqPath.startsWith('/api/')) {
-      return next()
-    }
-    // 如果是 uploads 请求，放行
-    if (reqPath.startsWith('/uploads/')) {
-      return next()
-    }
-    const indexPath = path.join(qiantaiDist, 'index.html')
-    if (fs.existsSync(indexPath)) {
-      res.sendFile(indexPath)
-    } else {
-      next()
-    }
-  })
-} else {
-  console.log('⚠️  前台 dist 目录不存在: ' + qiantaiDist)
-}
-
 // 根路径重定向到前台
 server.get('/', (req, res) => {
   res.redirect('/qiantai')
 })
 
-// ================= 收 token 并验证的中间件 =================
+// ========== 第一步：先注册所有 API 路由（必须在 SPA fallback 之前） ==========
+
+// token 验证中间件
 server.use((req, res, next) => {
   // 放行：静态文件、登录注册、上传、评论等公开接口
   if (req.path === '/api/login' || req.path === '/api/register' || req.path === '/api/upload-avatar' || req.path === '/api/upload-tupian' || req.path.startsWith('/uploads/') || req.path === '/api/dianzan' || req.path === '/api/shoucang' || req.path === '/api/dianzan-status' || req.path === '/api/shoucang-status' || req.path === '/api/pinglun' || req.path.startsWith('/api/pinglun/') || req.path === '/api/home-stats' || req.path === '/api/tongji-data' || req.path === '/api/news-detail' || req.path.startsWith('/qiantai') || req.path.startsWith('/houtai') || req.path === '/' || req.path.endsWith('.js') || req.path.endsWith('.css') || req.path.endsWith('.html') || req.path.endsWith('.png') || req.path.endsWith('.jpg') || req.path.endsWith('.svg') || req.path.endsWith('.ico') || req.path.endsWith('.woff') || req.path.endsWith('.woff2')) {
@@ -157,7 +64,7 @@ server.use((req, res, next) => {
   next()
 })
 
-// ================= 登录接口 =================
+// 登录接口
 server.post('/api/login', (req, res) => {
   const { username, password } = req.body
   const users = router.db.get('yonghulist').value()
@@ -177,7 +84,7 @@ server.post('/api/login', (req, res) => {
   }
 })
 
-// ================= 注册接口 =================
+// 注册接口
 server.post('/api/register', (req, res) => {
   const { username, password } = req.body
   const users = router.db.get('yonghulist').value()
@@ -198,7 +105,7 @@ server.post('/api/register', (req, res) => {
   return res.json({ code: 200, message: '注册成功' })
 })
 
-// ================= 阅读量接口 =================
+// 阅读量接口
 server.post('/api/read', (req, res) => {
   const { id } = req.body
 
@@ -226,7 +133,7 @@ server.post('/api/read', (req, res) => {
   })
 })
 
-// ================= 点赞接口 =================
+// 点赞接口
 server.post('/api/dianzan', (req, res) => {
   const { userId, articleId } = req.body
   if (!userId || !articleId) {
@@ -255,7 +162,7 @@ server.post('/api/dianzan', (req, res) => {
   }
 })
 
-// ================= 收藏接口 =================
+// 收藏接口
 server.post('/api/shoucang', (req, res) => {
   const { userId, articleId } = req.body
   if (!userId || !articleId) {
@@ -284,7 +191,7 @@ server.post('/api/shoucang', (req, res) => {
   }
 })
 
-// ================= 查询点赞/收藏状态接口 =================
+// 查询点赞/收藏状态接口
 server.get('/api/dianzan-status', (req, res) => {
   const { userId, articleId } = req.query
   if (!userId || !articleId) {
@@ -309,7 +216,7 @@ server.get('/api/shoucang-status', (req, res) => {
   return res.json({ code: 200, shoucanged: user.ishouchang.includes(articleId) })
 })
 
-// ================= 头像上传接口 =================
+// 头像上传接口
 server.post('/api/upload-avatar', (req, res) => {
   const { base64, userId } = req.body
   if (!base64 || !userId) {
@@ -329,7 +236,7 @@ server.post('/api/upload-avatar', (req, res) => {
   return res.json({ code: 200, url, message: '上传成功' })
 })
 
-// ================= 新闻图片上传接口 =================
+// 新闻图片上传接口
 server.post('/api/upload-tupian', (req, res) => {
   const { base64 } = req.body
   if (!base64) {
@@ -349,7 +256,7 @@ server.post('/api/upload-tupian', (req, res) => {
   return res.json({ code: 200, url, message: '上传成功' })
 })
 
-// ================= 修改密码接口 =================
+// 修改密码接口
 server.post('/api/change-password', (req, res) => {
   const { userId, oldPassword, newPassword } = req.body
 
@@ -380,7 +287,7 @@ server.post('/api/change-password', (req, res) => {
   return res.json({ code: 200, message: '密码修改成功' })
 })
 
-// ================= 评论接口 =================
+// 评论接口
 server.get('/api/pinglun', (req, res) => {
   const { xinwenId } = req.query
   if (!xinwenId) {
@@ -429,7 +336,7 @@ server.delete('/api/pinglun/:id', (req, res) => {
   return res.json({ code: 200, message: '删除成功' })
 })
 
-// ================= 首页统计接口 =================
+// 首页统计接口（同时为统计页提供回退数据）
 server.get('/api/home-stats', (req, res) => {
   try {
     const users = router.db.get('yonghulist').value() || []
@@ -437,9 +344,34 @@ server.get('/api/home-stats', (req, res) => {
     const zhongzhuan = router.db.get('zhongzhuanshuju').value() || []
     const bohui = router.db.get('bohuishuju').value() || []
 
-    // 计算总阅读量（三个表合并）
     const allNews = [...zhongzhuan, ...news, ...bohui]
     const totalViews = allNews.reduce((sum, item) => sum + (item.yueduLiang || 0), 0)
+
+    // 今日发布数
+    const today = new Date().toISOString().split('T')[0]
+    const todayPublished = news.filter(item => item.riQi === today).length
+
+    // 最近发布（按 riQi 倒序取前5条）
+    const recentNews = news
+      .sort((a, b) => new Date(b.riQi) - new Date(a.riQi))
+      .slice(0, 5)
+      .map(item => ({
+        id: item.id,
+        title: item.biaoTi,
+        author: item.laiYuan,
+        date: item.riQi,
+        status: '已发布'
+      }))
+
+    // 热门新闻TOP5（按阅读量降序）
+    const hotNews = allNews
+      .sort((a, b) => (b.yueduLiang || 0) - (a.yueduLiang || 0))
+      .slice(0, 5)
+      .map(item => ({
+        id: item.id,
+        title: item.biaoTi,
+        views: item.yueduLiang || 0
+      }))
 
     res.json({
       code: 200,
@@ -448,7 +380,13 @@ server.get('/api/home-stats', (req, res) => {
         newsCount: zhongzhuan.length,
         publishedCount: news.length,
         rejectedCount: bohui.length,
-        totalViews: totalViews
+        totalViews: totalViews,
+        // 统计页面需要的额外字段
+        totalNews: news.length,
+        todayPublished,
+        pendingReview: zhongzhuan.length,
+        recentNews,
+        hotNews
       }
     })
   } catch (err) {
@@ -457,7 +395,7 @@ server.get('/api/home-stats', (req, res) => {
   }
 })
 
-// ================= 新闻详情查询接口 =================
+// 新闻详情查询接口
 server.get('/api/news-detail', (req, res) => {
   try {
     const { id } = req.query
@@ -465,7 +403,6 @@ server.get('/api/news-detail', (req, res) => {
       return res.status(400).json({ code: 400, message: '缺少新闻 id' })
     }
 
-    // 在三个表中查找
     const zhanshi = router.db.get('zhanshishuju').find({ id }).value()
     const zhongzhuan = router.db.get('zhongzhuanshuju').find({ id }).value()
     const bohui = router.db.get('bohuishuju').find({ id }).value()
@@ -486,24 +423,20 @@ server.get('/api/news-detail', (req, res) => {
   }
 })
 
-// ================= 数据统计页面接口 =================
+// 数据统计页面接口
 server.get('/api/tongji-data', (req, res) => {
   try {
     const zhongzhuan = router.db.get('zhongzhuanshuju').value() || []
     const zhanshi = router.db.get('zhanshishuju').value() || []
     const bohui = router.db.get('bohuishuju').value() || []
 
-    // 合并所有新闻用于总统计
     const allNews = [...zhongzhuan, ...zhanshi, ...bohui]
 
-    // 今日发布（按日期筛选当天发布的）
-    const today = new Date().toISOString().split('T')[0] // e.g. "2026-06-21"
+    const today = new Date().toISOString().split('T')[0]
     const todayPublished = zhanshi.filter(item => item.riQi === today).length
 
-    // 总阅读量
     const totalViews = allNews.reduce((sum, item) => sum + (item.yueduLiang || 0), 0)
 
-    // 最近发布（从已发布新闻按 riQi 倒序取前5条）
     const recentNews = zhanshi
       .sort((a, b) => new Date(b.riQi) - new Date(a.riQi))
       .slice(0, 5)
@@ -515,7 +448,6 @@ server.get('/api/tongji-data', (req, res) => {
         status: '已发布'
       }))
 
-    // 热门新闻TOP5（按阅读量降序，从所有新闻中取）
     const hotNews = allNews
       .sort((a, b) => (b.yueduLiang || 0) - (a.yueduLiang || 0))
       .slice(0, 5)
@@ -528,12 +460,12 @@ server.get('/api/tongji-data', (req, res) => {
     res.json({
       code: 200,
       data: {
-        totalNews: zhanshi.length,      // 总新闻稿件
-        todayPublished,                  // 今日发布
-        pendingReview: zhongzhuan.length, // 待审核稿件
-        totalViews,                      // 总阅读量
-        recentNews,                      // 最近发布列表
-        hotNews                          // 热门新闻TOP5
+        totalNews: zhanshi.length,
+        todayPublished,
+        pendingReview: zhongzhuan.length,
+        totalViews,
+        recentNews,
+        hotNews
       }
     })
   } catch (err) {
@@ -542,11 +474,7 @@ server.get('/api/tongji-data', (req, res) => {
   }
 })
 
-// ================= 路由别名：前端请求路径 → 数据库表名 =================
-// 前端请求 /zhanshidataList → /zhanshishuju
-// 前端请求 /rejectedList → /bohuishuju
-
-// 路由别名表
+// 路由别名：前端请求路径 → 数据库表名
 const urlMap = {
   '/zhanshidataList': '/zhanshishuju',
   '/rejectedList': '/bohuishuju',
@@ -564,10 +492,85 @@ server.use((req, res, next) => {
   next()
 })
 
-// ================= 其他请求走 json-server =================
+// json-server 路由（处理 /zhanshishuju 等 CRUD）
 server.use(router)
 
-// 修复：API请求放行 + SPA fallback 排除/api/和/uploads/路径
+// ========== 第二步：托管前端静态文件 + SPA fallback（在 API 路由之后） ==========
+
+const houtaiDist = path.join(__dirname, 'dist')
+console.log('📁 __dirname =', __dirname)
+console.log('📁 houtaiDist =', houtaiDist)
+
+if (fs.existsSync(houtaiDist)) {
+  const assetsDir = path.join(houtaiDist, 'assets')
+  const assetsCount = fs.existsSync(assetsDir) ? fs.readdirSync(assetsDir).length : 0
+  console.log('✅ 后台 dist 目录存在，assets 文件数: ' + assetsCount)
+  console.log('📂 dist 内容:', fs.readdirSync(houtaiDist).join(', '))
+  if (fs.existsSync(assetsDir)) {
+    console.log('📂 dist/assets 内容:', fs.readdirSync(assetsDir).join(', '))
+  }
+
+  server.use('/houtai', require('express').static(houtaiDist, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
+      } else if (filePath.endsWith('.mjs')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
+      } else if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8')
+      }
+    }
+  }))
+
+  // SPA fallback
+  server.use('/houtai', (req, res, next) => {
+    const reqPath = req.path.replace(/^\/houtai/, '') || '/'
+    if (reqPath.startsWith('/assets/')) {
+      return res.status(404).send('Not Found')
+    }
+    // API 和 uploads 请求不会被路由到这里，因为已经在前面处理了
+    const indexPath = path.join(houtaiDist, 'index.html')
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath)
+    } else {
+      next()
+    }
+  })
+} else {
+  console.log('❌ 后台 dist 目录不存在! 路径:', houtaiDist)
+}
+
+// 托管前台展示前端
+const qiantaiDist = path.join(__dirname, 'qiantai-dist')
+if (fs.existsSync(qiantaiDist)) {
+  server.use('/qiantai', require('express').static(qiantaiDist, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
+      } else if (filePath.endsWith('.mjs')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
+      } else if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8')
+      }
+    }
+  }))
+  server.use('/qiantai', (req, res, next) => {
+    const reqPath = req.path.replace(/^\/qiantai/, '') || '/'
+    if (reqPath.startsWith('/assets/')) {
+      return res.status(404).send('Not Found')
+    }
+    const indexPath = path.join(qiantaiDist, 'index.html')
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath)
+    } else {
+      next()
+    }
+  })
+} else {
+  console.log('⚠️  前台 dist 目录不存在: ' + qiantaiDist)
+}
+
+// 启动
 const PORT = process.env.PORT || 3000
 server.listen(PORT, '0.0.0.0', () => {
   console.log('✅ 后端已启动：http://localhost:' + PORT)
@@ -575,13 +578,7 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log('   ⚙️  后台管理: http://localhost:' + PORT + '/houtai')
   console.log('   - 登录 POST /api/login')
   console.log('   - 注册 POST /api/register')
-  console.log('   - 阅读量 POST /api/read')
-  console.log('   - 点赞 POST /api/dianzan')
-  console.log('   - 收藏 POST /api/shoucang')
-  console.log('   - 点赞状态 GET /api/dianzan-status')
-  console.log('   - 收藏状态 GET /api/shoucang-status')
-  console.log('   - 头像上传 POST /api/upload-avatar')
-  console.log('   - 修改密码 POST /api/change-password')
+  console.log('   - 统计 GET /api/tongji-data')
+  console.log('   - 首页 GET /api/home-stats')
   console.log('   - 图片访问 /uploads/xxx')
-  console.log('   - 原数据接口如 GET /zhanshishuju 正常工作')
 })

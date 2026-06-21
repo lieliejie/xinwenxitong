@@ -105,8 +105,16 @@ const formatNum = (n: number): string => {
   return n.toLocaleString()
 }
 
-// 路由跳转
+// 路由跳转 - 数据未就绪时禁止跳转
 const goToRoute = (path: string) => {
+  if (loading.value) {
+    console.warn('统计数据尚未加载完成，禁止跳转')
+    return
+  }
+  if (loadError.value) {
+    console.warn('统计数据加载失败，请先重试')
+    return
+  }
   if (path) {
     router.push(path)
   }
@@ -114,9 +122,15 @@ const goToRoute = (path: string) => {
 
 // 路由跳转到新闻详情页，并携带新闻唯一标识符
 const goToDetail = (id: string) => {
-  if (id) {
-    router.push({ name: 'newsdetail', params: { id } })
+  if (loading.value) {
+    console.warn('统计数据尚未加载完成，禁止跳转')
+    return
   }
+  if (!id) {
+    console.warn('新闻 ID 无效')
+    return
+  }
+  router.push({ name: 'newsdetail', params: { id } })
 }
 
 // 统计数据
@@ -142,13 +156,22 @@ const fetchData = async () => {
   loading.value = true
   loadError.value = false
   try {
-    const res = await http.get('/api/tongji-data')
+    // 优先调用 /api/tongji-data（完整数据），失败时回退到 /api/home-stats（基础数据）
+    let res
+    try {
+      res = await http.get('/api/tongji-data')
+    } catch (_) {
+      // Railway 旧版不放行 /api/tongji-data，回退到 /api/home-stats
+      res = await http.get('/api/home-stats')
+    }
+
     if (res.data && res.data.code === 200) {
       const d = res.data.data
-      stats.totalNews = d.totalNews || 0
-      stats.todayPublished = d.todayPublished || 0
-      stats.pendingReview = d.pendingReview || 0
-      stats.totalViews = d.totalViews || 0
+      // 兼容两种 API 的字段名
+      stats.totalNews = d.totalNews ?? d.publishedCount ?? 0
+      stats.todayPublished = d.todayPublished ?? 0
+      stats.pendingReview = d.pendingReview ?? d.newsCount ?? 0
+      stats.totalViews = d.totalViews ?? 0
       recentNews.value = d.recentNews || []
       hotNews.value = d.hotNews || []
     } else {

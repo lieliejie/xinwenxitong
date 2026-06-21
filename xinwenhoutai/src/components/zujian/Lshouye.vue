@@ -146,8 +146,17 @@ onMounted(() => {
 });
 
 const goToRoute = (path: string) => {
+  // 禁止在数据未加载完成时跳转，防止目标页面因数据缺失而空白
+  if (loading.value) {
+    console.warn('数据尚未加载完成，请稍后再试')
+    return
+  }
+  if (loadError.value) {
+    console.warn('数据加载失败，请先重试')
+    return
+  }
   if (path) {
-    router.push(path);
+    router.push(path)
   }
 };
 

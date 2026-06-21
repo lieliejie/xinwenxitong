@@ -14,7 +14,7 @@
     
     <div class="stats-section">
       <div class="stats-grid">
-        <div class="stat-card" v-for="item in statsList" :key="item.id">
+        <div class="stat-card" v-for="item in statsList" :key="item.id" @click="goToRoute(item.path)">
           <div class="stat-top">
             <div class="stat-icon" :style="{ background: item.iconBg, color: item.iconColor }">
               {{ item.icon }}
@@ -65,7 +65,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import xinzeng from '../tanchuzujian/xinzeng.vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const today = new Date().toLocaleDateString('zh-CN', {
   year: 'numeric',
@@ -75,11 +77,17 @@ const today = new Date().toLocaleDateString('zh-CN', {
 });
 
 const statsList = ref([
-  { id: 1, icon: '👥', iconBg: '#e6f7ef', iconColor: '#07c160', label: '注册用户', value: '12,847', trend: 15.2 },
-  { id: 2, icon: '📰', iconBg: '#e8f3ff', iconColor: '#1677ff', label: '新闻内容', value: '3,256', trend: 8.7 },
-  { id: 3, icon: '📊', iconBg: '#fff7e6', iconColor: '#fa8c16', label: '今日访问', value: '45,892', trend: -2.1 },
-  { id: 4, icon: '💬', iconBg: '#fff1f0', iconColor: '#f5222d', label: '待办事项', value: '18', trend: 6.3 },
+  { id: 1, icon: '👥', iconBg: '#e6f7ef', iconColor: '#07c160', label: '注册用户', value: '12,847', trend: 15.2, path: '/users' },
+  { id: 2, icon: '📰', iconBg: '#e8f3ff', iconColor: '#1677ff', label: '新闻内容', value: '3,256', trend: 8.7, path: '/news' },
+  { id: 3, icon: '📊', iconBg: '#fff7e6', iconColor: '#fa8c16', label: '今日访问', value: '45,892', trend: -2.1, path: '/tongji' },
+  { id: 4, icon: '💬', iconBg: '#fff1f0', iconColor: '#f5222d', label: '待办事项', value: '18', trend: 6.3, path: '/shezhi' },
 ]);
+
+const goToRoute = (path: string) => {
+  if (path) {
+    router.push(path);
+  }
+};
 
 const quickList = [
   { path: '/users', icon: '👥', name: '用户管理', iconBg: '#e6f7ef' },
@@ -172,6 +180,7 @@ const notices = ref([
   padding: 20px;
   border: 1px solid var(--wechat-border);
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .stat-card:hover {

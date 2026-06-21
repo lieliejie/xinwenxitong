@@ -358,7 +358,7 @@ server.delete('/api/pinglun/:id', (req, res) => {
 server.use(router)
 
 const PORT = process.env.PORT || 3000
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log('✅ 后端已启动：http://localhost:' + PORT)
   console.log('   🏠 前台展示: http://localhost:' + PORT + '/qiantai')
   console.log('   ⚙️  后台管理: http://localhost:' + PORT + '/houtai')

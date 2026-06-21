@@ -2,6 +2,7 @@
   "name": "xinwenxitong",
   "version": "1.0.0",
   "scripts": {
-    "start": "cd xinwenhoutai && npm install && node houduanfangfa.cjs"
+    "build": "cd xinwenhoutai && npm install && npm run build && cd ../frontend/xinwenqiantai && npm install && npm run build && cp -r dist ../../xinwenhoutai/qiantai-dist",
+    "start": "cd xinwenhoutai && node houduanfangfa.cjs"
   }
 }

@@ -104,7 +104,7 @@ const statsList = ref([
   { id: 1, icon: '👥', iconBg: '#e6f7ef', iconColor: '#07c160', label: '注册用户', value: '--', trend: 0, path: '/users' },
   { id: 2, icon: '📰', iconBg: '#e8f3ff', iconColor: '#1677ff', label: '新闻总数', value: '--', trend: 0, path: '/news' },
   { id: 3, icon: '📊', iconBg: '#fff7e6', iconColor: '#fa8c16', label: '总阅读量', value: '--', trend: 0, path: '/tongji' },
-  { id: 4, icon: '💬', iconBg: '#fff1f0', iconColor: '#f5222d', label: '待处理', value: '--', trend: 0, path: '/shezhi' },
+  { id: 4, icon: '💬', iconBg: '#fff1f0', iconColor: '#f5222d', label: '待处理', value: '--', trend: 0, path: '/news' },
 ]);
 
 // 加载中/错误状态

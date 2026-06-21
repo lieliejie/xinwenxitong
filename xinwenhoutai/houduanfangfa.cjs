@@ -34,19 +34,53 @@ server.use('/uploads', require('express').static(uploadDir))
 // ================= 托管后台管理前端 (构建后的 dist 目录) =================
 const houtaiDist = path.join(__dirname, 'dist')
 if (fs.existsSync(houtaiDist)) {
-  server.use('/houtai', require('express').static(houtaiDist))
-  // SPA 路由 fallback
+  server.use('/houtai', require('express').static(houtaiDist, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
+      } else if (filePath.endsWith('.mjs')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
+      } else if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8')
+      }
+    }
+  }))
+  // SPA 路由 fallback：只对非静态资源请求返回 index.html
   server.get('/houtai/*', (req, res) => {
-    res.sendFile(path.join(houtaiDist, 'index.html'))
+    const reqPath = req.path.replace('/houtai', '')
+    const filePath = path.join(houtaiDist, reqPath)
+    // 如果请求的是存在的静态文件，express.static 已经处理了，这里只处理 SPA 路由
+    if (!fs.existsSync(filePath) && !reqPath.startsWith('/assets/')) {
+      res.sendFile(path.join(houtaiDist, 'index.html'))
+    } else if (!res.headersSent) {
+      // 文件存在但 static 没处理（极端情况），手动返回
+      res.sendFile(filePath)
+    }
   })
 }
 
 // ================= 托管前台展示前端 =================
 const qiantaiDist = path.join(__dirname, 'qiantai-dist')
 if (fs.existsSync(qiantaiDist)) {
-  server.use('/qiantai', require('express').static(qiantaiDist))
+  server.use('/qiantai', require('express').static(qiantaiDist, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
+      } else if (filePath.endsWith('.mjs')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8')
+      } else if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8')
+      }
+    }
+  }))
   server.get('/qiantai/*', (req, res) => {
-    res.sendFile(path.join(qiantaiDist, 'index.html'))
+    const reqPath = req.path.replace('/qiantai', '')
+    const filePath = path.join(qiantaiDist, reqPath)
+    if (!fs.existsSync(filePath) && !reqPath.startsWith('/assets/')) {
+      res.sendFile(path.join(qiantaiDist, 'index.html'))
+    } else if (!res.headersSent) {
+      res.sendFile(filePath)
+    }
   })
 } else {
   console.log('⚠️  前台 dist 目录不存在: ' + qiantaiDist)

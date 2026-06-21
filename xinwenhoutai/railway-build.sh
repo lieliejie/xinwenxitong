@@ -8,7 +8,7 @@ echo "====== 构建后台管理前端 ======"
 npm run build
 
 echo "====== 安装并构建前台展示前端 ======"
-cd ../前台展示页面/xinwenqiantai
+cd ../frontend/xinwenqiantai
 npm install
 npm run build
 

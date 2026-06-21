@@ -362,10 +362,12 @@ const dbAliases = {
 }
 
 Object.entries(dbAliases).forEach(([from, to]) => {
+  // 不带 /api 前缀的别名
   server.use(from, (req, res, next) => {
     req.url = to + req.url.slice(from.length)
     next()
   })
+  // 带 /api 前缀的别名
   server.use('/api' + from, (req, res, next) => {
     req.url = '/api' + to + req.url.slice(('/api' + from).length)
     next()
@@ -374,6 +376,7 @@ Object.entries(dbAliases).forEach(([from, to]) => {
 
 // ================= 其他请求走 json-server =================
 server.use('/api', router)
+server.use(router)
 
 const PORT = process.env.PORT || 3000
 server.listen(PORT, '0.0.0.0', () => {

@@ -1,7 +1,6 @@
 node_modules/
 dist/
-!xinwenhoutai/qiantai-dist/
-!xinwenhoutai/dist/
+qiantai-dist/
 logs/
 .DS_Store
 *.log

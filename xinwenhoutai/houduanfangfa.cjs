@@ -34,6 +34,9 @@ server.use('/uploads', require('express').static(uploadDir))
 // ================= 托管后台管理前端 (构建后的 dist 目录) =================
 const houtaiDist = path.join(__dirname, 'dist')
 if (fs.existsSync(houtaiDist)) {
+  const assetsDir = path.join(houtaiDist, 'assets')
+  const assetsCount = fs.existsSync(assetsDir) ? fs.readdirSync(assetsDir).length : 0
+  console.log('✅ 后台 dist 目录存在，assets 文件数: ' + assetsCount)
   server.use('/houtai', require('express').static(houtaiDist, {
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.js')) {

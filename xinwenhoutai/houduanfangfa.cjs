@@ -41,12 +41,14 @@ if (fs.existsSync(houtaiDist)) {
 }
 
 // ================= 托管前台展示前端 =================
-const qiantaiDist = path.join(__dirname, '..', '前台展示页面', 'xinwenqiantai', 'dist')
+const qiantaiDist = path.join(__dirname, 'qiantai-dist')
 if (fs.existsSync(qiantaiDist)) {
   server.use('/qiantai', require('express').static(qiantaiDist))
   server.get('/qiantai/*', (req, res) => {
     res.sendFile(path.join(qiantaiDist, 'index.html'))
   })
+} else {
+  console.log('⚠️  前台 dist 目录不存在: ' + qiantaiDist)
 }
 
 // 根路径重定向到前台

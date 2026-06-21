@@ -1,1 +1,0 @@
-import{S as e,a as t,g as n}from"./index-CfLnlM0K.js";var r={};function i(t,r){return e(),n(`div`,null,`切换账号`)}var a=t(r,[[`render`,i]]);export{a as default};

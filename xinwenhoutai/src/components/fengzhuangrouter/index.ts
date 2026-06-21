@@ -31,10 +31,10 @@ const router = createRouter({
             {path:'tuichudenglu',component:()=>import('../shezhizizujian/zhanghaozizujian/tuichudenglu.vue')},
           ]
         },
-        { path: 'zhuti', component: () => import('../shezhizizujian/tongyong.vue')},
-        { path: 'beifen', component: () => import('../shezhizizujian/tongyong.vue')},
-        { path: 'xitong', component: () => import('../shezhizizujian/tongyong.vue')},
-        { path: 'tongzhi', component: () => import('../shezhizizujian/tongyong.vue')}  
+        { path: 'zhuti', component: () => import('../shezhizizujian/zhuti.vue')},
+        { path: 'beifen', component: () => import('../shezhizizujian/beifen.vue')},
+        { path: 'xitong', component: () => import('../shezhizizujian/xitong.vue')},
+        { path: 'tongzhi', component: () => import('../shezhizizujian/tongzhi.vue')}  
 
       ]
     } 

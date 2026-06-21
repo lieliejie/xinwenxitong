@@ -36,6 +36,17 @@ export const useStore = defineStore('cangku', () => {
 
   let selectedList = ref([])
 
+  let rejectedList = ref([])
+  let fetchRejectedList = async () => {
+    try {
+      let res = await http.get('/rejectedList')
+      rejectedList.value = res.data || []
+    } catch (error) {
+      console.error('获取通知历史数据失败:', error)
+    }
+  }
+  fetchRejectedList()
+
   let fetchData = async () => {
     try {
       let r = await http.get('/zhongzhuandataList')
@@ -71,7 +82,8 @@ export const useStore = defineStore('cangku', () => {
     isBatchRejectTip,
     selectedList,
     isBatchReject,
-    isBatchPublish
+    isBatchPublish,
+    rejectedList
   }
 })
 

@@ -336,7 +336,7 @@ server.delete('/api/pinglun/:id', (req, res) => {
   return res.json({ code: 200, message: '删除成功' })
 })
 
-// 首页统计接口（同时为统计页提供回退数据）
+// 首页统计接口
 server.get('/api/home-stats', (req, res) => {
   try {
     const users = router.db.get('yonghulist').value() || []
@@ -347,32 +347,6 @@ server.get('/api/home-stats', (req, res) => {
     const allNews = [...zhongzhuan, ...news, ...bohui]
     const totalViews = allNews.reduce((sum, item) => sum + (item.yueduLiang || 0), 0)
 
-    // 今日发布数
-    const today = new Date().toISOString().split('T')[0]
-    const todayPublished = news.filter(item => item.riQi === today).length
-
-    // 最近发布（按 riQi 倒序取前5条）
-    const recentNews = news
-      .sort((a, b) => new Date(b.riQi) - new Date(a.riQi))
-      .slice(0, 5)
-      .map(item => ({
-        id: item.id,
-        title: item.biaoTi,
-        author: item.laiYuan,
-        date: item.riQi,
-        status: '已发布'
-      }))
-
-    // 热门新闻TOP5（按阅读量降序）
-    const hotNews = allNews
-      .sort((a, b) => (b.yueduLiang || 0) - (a.yueduLiang || 0))
-      .slice(0, 5)
-      .map(item => ({
-        id: item.id,
-        title: item.biaoTi,
-        views: item.yueduLiang || 0
-      }))
-
     res.json({
       code: 200,
       data: {
@@ -380,13 +354,7 @@ server.get('/api/home-stats', (req, res) => {
         newsCount: zhongzhuan.length,
         publishedCount: news.length,
         rejectedCount: bohui.length,
-        totalViews: totalViews,
-        // 统计页面需要的额外字段
-        totalNews: news.length,
-        todayPublished,
-        pendingReview: zhongzhuan.length,
-        recentNews,
-        hotNews
+        totalViews: totalViews
       }
     })
   } catch (err) {

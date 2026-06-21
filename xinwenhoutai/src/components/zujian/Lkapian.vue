@@ -1,140 +1,110 @@
 <template>
   <div class="page-container">
-    
-    <!-- 加载骨架屏 -->
+    <!-- 加载中骨架 -->
     <div v-if="loading" class="card-group">
       <div v-for="i in 4" :key="'skel-' + i" class="stat-card stat-skeleton">
         <div class="skeleton-icon"></div>
-        <div class="skeleton-content">
-          <div class="skeleton-label"></div>
+        <div class="card-content">
           <div class="skeleton-value"></div>
+          <div class="skeleton-label"></div>
         </div>
       </div>
     </div>
+
     <!-- 加载失败 -->
     <div v-else-if="loadError" class="stats-error">
       <span>⚠️ 数据加载失败</span>
       <button class="retry-btn" @click="fetchData">重试</button>
     </div>
-    <!-- 正常数据 -->
-    <div v-else class="card-group">
-      <div class="stat-card" @click="goToRoute('/news')">
-        <div class="card-icon green">📰</div>
-        <div class="card-content">
-          <div class="card-label">总新闻稿件</div>
-          <div class="card-value">{{ formatNum(stats.totalNews) }}</div>
-        </div>
-      </div>
-      <div class="stat-card" @click="goToRoute('/news')">
-        <div class="card-icon green">✍️</div>
-        <div class="card-content">
-          <div class="card-label">今日发布</div>
-          <div class="card-value">{{ formatNum(stats.todayPublished) }}</div>
-        </div>
-      </div>
-      <div class="stat-card" @click="goToRoute('/news')">
-        <div class="card-icon orange">⏳</div>
-        <div class="card-content">
-          <div class="card-label">待审核稿件</div>
-          <div class="card-value">{{ formatNum(stats.pendingReview) }}</div>
-        </div>
-      </div>
-      <div class="stat-card" @click="goToRoute('/tongji')">
-        <div class="card-icon green">👁️</div>
-        <div class="card-content">
-          <div class="card-label">总阅读量</div>
-          <div class="card-value">{{ formatNum(stats.totalViews) }}</div>
-        </div>
-      </div>
-    </div>
 
-    
-    <div class="content-section">
-      
-      <div class="section-card">
-        <div class="section-header">
-          <span class="section-title">📅 最近发布</span>
-          <span class="section-more" @click="goToRoute('/news')">查看全部 →</span>
-        </div>
-        <div class="news-list">
-          <div v-for="item in recentNews" :key="item.id" class="news-item" @click="goToDetail(item.id)">
-            <div class="news-title">{{ item.title }}</div>
-            <div class="news-meta">
-              <span class="meta-item">📝 {{ item.author }}</span>
-              <span class="meta-item">🕐 {{ item.date }}</span>
-              <span class="meta-tag tag-green">{{ item.status }}</span>
-            </div>
+    <!-- 正常展示 -->
+    <template v-else>
+      <!-- 统计卡片 -->
+      <div class="card-group">
+        <div class="stat-card" @click="goToRoute('/news')">
+          <div class="card-icon green">📰</div>
+          <div class="card-content">
+            <div class="card-label">总新闻稿件</div>
+            <div class="card-value">{{ stats.totalNews }}</div>
           </div>
-          <div v-if="recentNews.length === 0" class="empty-tip">暂无发布数据</div>
+        </div>
+        <div class="stat-card" @click="goToRoute('/news')">
+          <div class="card-icon green">✍️</div>
+          <div class="card-content">
+            <div class="card-label">今日发布</div>
+            <div class="card-value">{{ stats.todayPublished }}</div>
+          </div>
+        </div>
+        <div class="stat-card" @click="goToRoute('/news')">
+          <div class="card-icon orange">⏳</div>
+          <div class="card-content">
+            <div class="card-label">待审核稿件</div>
+            <div class="card-value">{{ stats.pendingReview }}</div>
+          </div>
+        </div>
+        <div class="stat-card" @click="goToRoute('/tongji')">
+          <div class="card-icon green">👁️</div>
+          <div class="card-content">
+            <div class="card-label">总阅读量</div>
+            <div class="card-value">{{ stats.totalViews.toLocaleString() }}</div>
+          </div>
         </div>
       </div>
 
-      
-      <div class="section-card">
-        <div class="section-header">
-          <span class="section-title">🔥 热门新闻TOP5</span>
-          <span class="section-more" @click="goToRoute('/news')">查看排行 →</span>
-        </div>
-        <div class="hot-list">
-          <div v-for="(item, index) in hotNews" :key="item.id" class="hot-item" @click="goToDetail(item.id)">
-            <span class="hot-rank" :class="'rank-' + (index + 1)">{{ index + 1 }}</span>
-            <div class="hot-content">
-              <div class="hot-title">{{ item.title }}</div>
-              <div class="hot-views">👁️ {{ item.views.toLocaleString() }} 阅读</div>
+      <!-- 下方内容区 -->
+      <div class="content-section">
+        <!-- 模块1：最近发布 -->
+        <div class="section-card">
+          <div class="section-header">
+            <span class="section-title">📅 最近发布</span>
+            <span class="section-more" @click="goToRoute('/news')">查看全部 →</span>
+          </div>
+          <div class="news-list">
+            <div v-for="item in recentNews" :key="item.id" class="news-item" @click="goToDetail(item.id)">
+              <div class="news-title">{{ item.title }}</div>
+              <div class="news-meta">
+                <span class="meta-item">📝 {{ item.author }}</span>
+                <span class="meta-item">🕐 {{ item.date }}</span>
+                <span class="meta-tag tag-green">{{ item.status }}</span>
+              </div>
             </div>
           </div>
-          <div v-if="hotNews.length === 0" class="empty-tip">暂无热度数据</div>
+        </div>
+
+        <!-- 模块2：热门新闻TOP5 -->
+        <div class="section-card">
+          <div class="section-header">
+            <span class="section-title">🔥 热门新闻TOP5</span>
+            <span class="section-more" @click="goToRoute('/news')">查看排行 →</span>
+          </div>
+          <div class="hot-list">
+            <div v-for="(item, index) in hotNews" :key="item.id" class="hot-item" @click="goToDetail(item.id)">
+              <span class="hot-rank" :class="'rank-' + (index + 1)">{{ index + 1 }}</span>
+              <div class="hot-content">
+                <div class="hot-title">{{ item.title }}</div>
+                <div class="hot-views">👁️ {{ item.views.toLocaleString() }} 阅读</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { http } from '../fengzhuang/axios.ts'
 
 const router = useRouter()
 
-// 格式化大数字
-const formatNum = (n: number): string => {
-  if (n >= 10000) {
-    return (n / 10000).toFixed(n % 10000 === 0 ? 0 : 1) + '万'
-  }
-  return n.toLocaleString()
-}
-
-// 路由跳转 - 数据未就绪时禁止跳转
-const goToRoute = (path: string) => {
-  if (loading.value) {
-    console.warn('统计数据尚未加载完成，禁止跳转')
-    return
-  }
-  if (loadError.value) {
-    console.warn('统计数据加载失败，请先重试')
-    return
-  }
-  if (path) {
-    router.push(path)
-  }
-}
-
-// 路由跳转到新闻详情页，并携带新闻唯一标识符
-const goToDetail = (id: string) => {
-  if (loading.value) {
-    console.warn('统计数据尚未加载完成，禁止跳转')
-    return
-  }
-  if (!id) {
-    console.warn('新闻 ID 无效')
-    return
-  }
-  router.push({ name: 'newsdetail', params: { id } })
-}
+// 状态
+const loading = ref(true)
+const loadError = ref(false)
 
 // 统计数据
-const stats = reactive({
+const stats = ref({
   totalNews: 0,
   todayPublished: 0,
   pendingReview: 0,
@@ -147,31 +117,20 @@ const recentNews = ref([])
 // 热门新闻TOP5
 const hotNews = ref([])
 
-// 加载状态
-const loading = ref(true)
-const loadError = ref(false)
-
-// 获取数据
+// 从数据库获取数据
 const fetchData = async () => {
   loading.value = true
   loadError.value = false
   try {
-    // 优先调用 /api/tongji-data（完整数据），失败时回退到 /api/home-stats（基础数据）
-    let res
-    try {
-      res = await http.get('/api/tongji-data')
-    } catch (_) {
-      // Railway 旧版不放行 /api/tongji-data，回退到 /api/home-stats
-      res = await http.get('/api/home-stats')
-    }
-
+    const res = await http.get('/api/tongji-data')
     if (res.data && res.data.code === 200) {
       const d = res.data.data
-      // 兼容两种 API 的字段名
-      stats.totalNews = d.totalNews ?? d.publishedCount ?? 0
-      stats.todayPublished = d.todayPublished ?? 0
-      stats.pendingReview = d.pendingReview ?? d.newsCount ?? 0
-      stats.totalViews = d.totalViews ?? 0
+      stats.value = {
+        totalNews: d.totalNews || 0,
+        todayPublished: d.todayPublished || 0,
+        pendingReview: d.pendingReview || 0,
+        totalViews: d.totalViews || 0
+      }
       recentNews.value = d.recentNews || []
       hotNews.value = d.hotNews || []
     } else {
@@ -185,13 +144,27 @@ const fetchData = async () => {
   }
 }
 
+// 路由跳转
+const goToRoute = (path) => {
+  if (path) {
+    router.push(path)
+  }
+}
+
+// 跳转到新闻详情
+const goToDetail = (id) => {
+  if (id) {
+    router.push({ name: 'newsdetail', params: { id } })
+  }
+}
+
 onMounted(() => {
   fetchData()
 })
 </script>
 
 <style scoped>
-
+/* 页面容器：统一内边距 */
 a{
   text-decoration: none;
 }
@@ -201,7 +174,7 @@ a{
   min-height: 100%;
 }
 
-
+/* 原有统计卡片样式（保留） */
 .card-group {
   display: flex;
   flex-wrap: wrap;
@@ -221,13 +194,6 @@ a{
   align-items: center;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.stat-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
 }
 
 .card-icon.green {
@@ -275,7 +241,7 @@ a{
   color: #333;
 }
 
-
+/* 新增：下方内容区样式 */
 .content-section {
   display: flex;
   gap: 20px;
@@ -313,7 +279,7 @@ a{
   cursor: pointer;
 }
 
-
+/* 最近发布列表 */
 .news-list {
   display: flex;
   flex-direction: column;
@@ -323,12 +289,6 @@ a{
 .news-item {
   padding: 10px 0;
   border-bottom: 1px solid #f5f5f5;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.news-item:hover {
-  background: #f9fdf9;
-  padding-left: 6px;
 }
 
 .news-item:last-child {
@@ -371,7 +331,7 @@ a{
   color: #ff9500;
 }
 
-
+/* 热门新闻TOP5 */
 .hot-list {
   display: flex;
   flex-direction: column;
@@ -382,13 +342,6 @@ a{
   display: flex;
   align-items: center;
   gap: 12px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  padding: 4px 0;
-}
-.hot-item:hover {
-  background: #f9fdf9;
-  padding-left: 6px;
 }
 
 .hot-rank {
@@ -443,21 +396,18 @@ a{
   margin-right: 20px;
   flex-shrink: 0;
 }
-.skeleton-content {
-  flex: 1;
-}
-.skeleton-label {
-  width: 50%;
-  height: 14px;
+.skeleton-value {
+  width: 60%;
+  height: 24px;
   border-radius: 4px;
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }
-.skeleton-value {
-  width: 70%;
-  height: 24px;
+.skeleton-label {
+  width: 40%;
+  height: 14px;
   border-radius: 4px;
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
@@ -468,13 +418,13 @@ a{
   100% { background-position: 200% 0; }
 }
 
-/* 错误提示 */
+/* 错误状态 */
 .stats-error {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 30px;
+  padding: 40px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
@@ -496,11 +446,19 @@ a{
   color: #fff;
 }
 
-/* 空数据提示 */
-.empty-tip {
-  text-align: center;
-  color: #bbb;
-  font-size: 14px;
-  padding: 20px 0;
+/* 响应式 */
+@media (max-width: 768px) {
+  .card-group {
+    flex-direction: column;
+  }
+  .stat-card {
+    min-width: auto;
+  }
+  .content-section {
+    flex-direction: column;
+  }
+  .section-card {
+    min-width: auto;
+  }
 }
 </style>

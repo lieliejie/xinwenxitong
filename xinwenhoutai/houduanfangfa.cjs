@@ -67,6 +67,14 @@ if (fs.existsSync(houtaiDist)) {
       // express.static 没处理说明文件不存在，返回 404
       return res.status(404).send('Not Found')
     }
+    // 如果是 API 请求，放行给后面的 json-server 处理
+    if (reqPath.startsWith('/api/')) {
+      return next()
+    }
+    // 如果是 uploads 请求，放行
+    if (reqPath.startsWith('/uploads/')) {
+      return next()
+    }
     // 其他路径（SPA 路由），返回 index.html
     const indexPath = path.join(houtaiDist, 'index.html')
     if (fs.existsSync(indexPath)) {
@@ -98,6 +106,14 @@ if (fs.existsSync(qiantaiDist)) {
     const reqPath = req.path.replace(/^\/qiantai/, '') || '/'
     if (reqPath.startsWith('/assets/')) {
       return res.status(404).send('Not Found')
+    }
+    // 如果是 API 请求，放行给后面的 json-server 处理
+    if (reqPath.startsWith('/api/')) {
+      return next()
+    }
+    // 如果是 uploads 请求，放行
+    if (reqPath.startsWith('/uploads/')) {
+      return next()
     }
     const indexPath = path.join(qiantaiDist, 'index.html')
     if (fs.existsSync(indexPath)) {

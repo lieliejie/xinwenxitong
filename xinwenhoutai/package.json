@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && cd ../前台展示页面/xinwenqiantai && npm install && npm run build",
     "preview": "vite preview",
     "start": "node houduanfangfa.cjs"
   },

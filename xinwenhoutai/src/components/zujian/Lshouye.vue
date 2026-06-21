@@ -13,13 +13,27 @@
 
     
     <div class="stats-section">
-      <div class="stats-grid">
+      <!-- 加载中骨架 -->
+      <div v-if="loading" class="stats-grid">
+        <div v-for="i in 4" :key="'skel-' + i" class="stat-card stat-skeleton">
+          <div class="skeleton-icon"></div>
+          <div class="skeleton-value"></div>
+          <div class="skeleton-label"></div>
+        </div>
+      </div>
+      <!-- 加载失败 -->
+      <div v-else-if="loadError" class="stats-error">
+        <span>⚠️ 数据加载失败</span>
+        <button class="retry-btn" @click="fetchStats">重试</button>
+      </div>
+      <!-- 正常数据 -->
+      <div v-else class="stats-grid">
         <div class="stat-card" v-for="item in statsList" :key="item.id" @click="goToRoute(item.path)">
           <div class="stat-top">
             <div class="stat-icon" :style="{ background: item.iconBg, color: item.iconColor }">
               {{ item.icon }}
             </div>
-            <span class="stat-trend" :class="item.trend > 0 ? 'up' : 'down'">
+            <span v-if="item.trend !== 0" class="stat-trend" :class="item.trend > 0 ? 'up' : 'down'">
               {{ item.trend > 0 ? '↑' : '↓' }} {{ Math.abs(item.trend) }}%
             </span>
           </div>
@@ -64,8 +78,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { http } from '../fengzhuang/axios.ts';
 
 const router = useRouter();
 
@@ -76,12 +91,59 @@ const today = new Date().toLocaleDateString('zh-CN', {
   weekday: 'long'
 });
 
+// 格式化大数字
+const formatNum = (n: number): string => {
+  if (n >= 10000) {
+    return (n / 10000).toFixed(n % 10000 === 0 ? 0 : 1) + '万'
+  }
+  return n.toLocaleString()
+}
+
+// 统计卡片配置（固定 UI 信息 + 动态 value/trend）
 const statsList = ref([
-  { id: 1, icon: '👥', iconBg: '#e6f7ef', iconColor: '#07c160', label: '注册用户', value: '12,847', trend: 15.2, path: '/users' },
-  { id: 2, icon: '📰', iconBg: '#e8f3ff', iconColor: '#1677ff', label: '新闻内容', value: '3,256', trend: 8.7, path: '/news' },
-  { id: 3, icon: '📊', iconBg: '#fff7e6', iconColor: '#fa8c16', label: '今日访问', value: '45,892', trend: -2.1, path: '/tongji' },
-  { id: 4, icon: '💬', iconBg: '#fff1f0', iconColor: '#f5222d', label: '待办事项', value: '18', trend: 6.3, path: '/shezhi' },
+  { id: 1, icon: '👥', iconBg: '#e6f7ef', iconColor: '#07c160', label: '注册用户', value: '--', trend: 0, path: '/users' },
+  { id: 2, icon: '📰', iconBg: '#e8f3ff', iconColor: '#1677ff', label: '新闻总数', value: '--', trend: 0, path: '/news' },
+  { id: 3, icon: '📊', iconBg: '#fff7e6', iconColor: '#fa8c16', label: '总阅读量', value: '--', trend: 0, path: '/tongji' },
+  { id: 4, icon: '💬', iconBg: '#fff1f0', iconColor: '#f5222d', label: '待处理', value: '--', trend: 0, path: '/shezhi' },
 ]);
+
+// 加载中/错误状态
+const loading = ref(true);
+const loadError = ref(false);
+
+// 从后端获取统计数据
+const fetchStats = async () => {
+  loading.value = true;
+  loadError.value = false;
+  try {
+    const res = await http.get('/api/home-stats');
+    if (res.data && res.data.code === 200) {
+      const d = res.data.data;
+      statsList.value[0].value = formatNum(d.userCount || 0);
+      statsList.value[1].value = formatNum(d.newsCount || 0);
+      statsList.value[2].value = formatNum(d.totalViews || 0);
+      // 待处理 = 驳回数（可选展示发布数）
+      statsList.value[3].value = formatNum(d.rejectedCount || 0);
+
+      // 趋势暂时用 0（后端可扩展），也可根据实际数据计算
+      statsList.value[0].trend = 0;
+      statsList.value[1].trend = 0;
+      statsList.value[2].trend = 0;
+      statsList.value[3].trend = 0;
+    } else {
+      loadError.value = true;
+    }
+  } catch (err) {
+    console.error('获取首页统计数据失败:', err);
+    loadError.value = true;
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchStats();
+});
 
 const goToRoute = (path: string) => {
   if (path) {
@@ -89,17 +151,11 @@ const goToRoute = (path: string) => {
   }
 };
 
-const quickList = [
-  { path: '/users', icon: '👥', name: '用户管理', iconBg: '#e6f7ef' },
-  { path: '/news', icon: '📰', name: '新闻管理', iconBg: '#e8f3ff' },
-  { path: '/statistics', icon: '📊', name: '数据统计', iconBg: '#fff7e6' },
-  { path: '/settings', icon: '⚙️', name: '系统设置', iconBg: '#f5f5f5' },
-];
-
+// 系统公告保留静态数据（可后续扩展为动态 API）
 const notices = ref([
-  { id: 1, title: '系统将于今晚 02:00 进行例行维护，预计耗时30分钟', time: '5分钟前' },
-  { id: 2, title: '新版本 v2.0 已发布，新增批量导入功能', time: '2小时前' },
-  { id: 3, title: '用户数据导出功能已上线，支持Excel格式', time: '1天前' },
+  { id: 1, title: '系统已成功部署上线，欢迎使用后台管理系统', time: '今天' },
+  { id: 2, title: '请定期备份数据库文件 dbs.json，以防数据丢失', time: '今天' },
+  { id: 3, title: '如有功能需求或问题反馈，请联系系统管理员', time: '1天前' },
 ]);
 </script>
 
@@ -345,6 +401,70 @@ const notices = ref([
   flex-shrink: 0;
 }
 
+
+/* 骨架屏 */
+.stat-skeleton {
+  cursor: default;
+  pointer-events: none;
+}
+.skeleton-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  margin-bottom: 12px;
+}
+.skeleton-value {
+  width: 60%;
+  height: 28px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  margin-bottom: 8px;
+}
+.skeleton-label {
+  width: 40%;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* 错误提示 */
+.stats-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  color: #999;
+  font-size: 14px;
+}
+.retry-btn {
+  padding: 4px 16px;
+  border: 1px solid var(--wechat-green);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--wechat-green);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.retry-btn:hover {
+  background: var(--wechat-green);
+  color: #fff;
+}
 
 @media (max-width: 1200px) {
   .stats-grid {

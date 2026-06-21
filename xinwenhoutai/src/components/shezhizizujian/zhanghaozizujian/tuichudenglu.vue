@@ -10,14 +10,14 @@
           <p>确认退出当前账号</p>
         </div>
       </div>
-      <span class="close-btn" @click="router.back()" title="返回">✕</span>
+      <span class="close-btn" @click="router.push('/zhanghao')" title="返回">✕</span>
     </div>
 
     <div class="form-wrapper">
       <p class="confirm-text">确定要退出当前账号吗？退出后需要重新登录。</p>
       <div class="btn-group">
         <button class="btn confirm-btn" @click="tuichu">确认退出</button>
-        <button class="btn back-btn" @click="router.back()">取消</button>
+        <button class="btn back-btn" @click="router.push('/shezhi/zhanghao')">取消</button>
       </div>
     </div>
   </div>
@@ -39,9 +39,9 @@ const tuichu = () => {
 
 <style scoped>
 .tuichu-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  background: transparent;
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 25px 20px;
 }
 
 .card {

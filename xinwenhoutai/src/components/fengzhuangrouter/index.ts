@@ -20,24 +20,16 @@ const router = createRouter({
   { path: 'tongji', component: () => import('../zujian/Lkapian.vue') }, 
   { path: 'users', component: () => import('../zujian/Lbiaoge.vue') }, 
   { path: 'news', component: () => import('../zujian/Lxinwenkapian.vue') }, 
-  
-    { path: 'shezhi', component: () => import('../zujian/shezhi.vue') ,
-      children:[
-        { path: 'zhanghao', component: () => import('../shezhizizujian/zhanghao.vue'),
-          children:[
-            {path:'gerenziliao',component:()=>import('../shezhizizujian/zhanghaozizujian/gerenziliao.vue')},
-            {path:'xiugaimima',component:()=>import('../shezhizizujian/zhanghaozizujian/xiugaimima.vue')},
-            {path:'qiehuanzhanghao',component:()=>import('../shezhizizujian/zhanghaozizujian/qiehuanzhanghao.vue')},
-            {path:'tuichudenglu',component:()=>import('../shezhizizujian/zhanghaozizujian/tuichudenglu.vue')},
-          ]
-        },
-        { path: 'zhuti', component: () => import('../shezhizizujian/zhuti.vue')},
-        { path: 'beifen', component: () => import('../shezhizizujian/beifen.vue')},
-        { path: 'xitong', component: () => import('../shezhizizujian/xitong.vue')},
-        { path: 'tongzhi', component: () => import('../shezhizizujian/tongzhi.vue')}  
-
-      ]
-    } 
+  { path: 'shezhi', component: () => import('../zujian/shezhi.vue') },
+  { path: 'zhanghao', component: () => import('../shezhizizujian/zhanghao.vue') },
+  { path: 'gerenziliao', component: () => import('../shezhizizujian/zhanghaozizujian/gerenziliao.vue') },
+  { path: 'xiugaimima', component: () => import('../shezhizizujian/zhanghaozizujian/xiugaimima.vue') },
+  { path: 'qiehuanzhanghao', component: () => import('../shezhizizujian/zhanghaozizujian/qiehuanzhanghao.vue') },
+  { path: 'tuichudenglu', component: () => import('../shezhizizujian/zhanghaozizujian/tuichudenglu.vue') },
+  { path: 'zhuti', component: () => import('../shezhizizujian/zhuti.vue') },
+  { path: 'beifen', component: () => import('../shezhizizujian/beifen.vue') },
+  { path: 'xitong', component: () => import('../shezhizizujian/xitong.vue') },
+  { path: 'tongzhi', component: () => import('../shezhizizujian/tongzhi.vue') }
 ]
     
   }

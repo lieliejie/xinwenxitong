@@ -15,37 +15,45 @@
     </div>
 
     <div class="menu-wrapper">
-      <router-link to="/shezhi/zhanghao/gerenziliao" class="menu-item">
-        <div class="menu-left">
-          <span class="icon">👤</span>
-          <span class="text">个人资料</span>
+      <router-link to="/gerenziliao" class="menu-link">
+        <div class="menu-item">
+          <div class="menu-left">
+            <span class="icon">👤</span>
+            <span class="text">个人资料</span>
+          </div>
+          <span class="arrow">></span>
         </div>
-        <span class="arrow">></span>
       </router-link>
 
-      <router-link to="/shezhi/zhanghao/xiugaimima" class="menu-item">
-        <div class="menu-left">
-          <span class="icon">🔒</span>
-          <span class="text">修改密码</span>
+      <router-link to="/xiugaimima" class="menu-link">
+        <div class="menu-item">
+          <div class="menu-left">
+            <span class="icon">🔒</span>
+            <span class="text">修改密码</span>
+          </div>
+          <span class="arrow">></span>
         </div>
-        <span class="arrow">></span>
       </router-link>
 
-      <div class="menu-item" @click="qiehuan">
-        <div class="menu-left">
-          <span class="icon">🔄</span>
-          <span class="text">切换账号</span>
+      <router-link to="/qiehuanzhanghao" class="menu-link">
+        <div class="menu-item">
+          <div class="menu-left">
+            <span class="icon">🔄</span>
+            <span class="text">切换账号</span>
+          </div>
+          <span class="arrow">></span>
         </div>
-        <span class="arrow">></span>
-      </div>
+      </router-link>
 
-      <div class="menu-item logout" @click="logout">
-        <div class="menu-left">
-          <span class="icon">🚪</span>
-          <span class="text">退出登录</span>
+      <router-link to="/tuichudenglu" class="menu-link">
+        <div class="menu-item logout">
+          <div class="menu-left">
+            <span class="icon">🚪</span>
+            <span class="text">退出登录</span>
+          </div>
+          <span class="arrow">></span>
         </div>
-        <span class="arrow">></span>
-      </div>
+      </router-link>
 
       <div class="menu-item" @click="router.back()">
         <div class="menu-left">
@@ -55,8 +63,6 @@
         <span class="arrow">></span>
       </div>
     </div>
-
-    <router-view />
   </div>
 </template>
 
@@ -90,19 +96,6 @@ onMounted(async () => {
   }
 })
 
-const qiehuan = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('isLogin')
-  localStorage.removeItem('userId')
-  router.push('/login')
-}
-
-const logout = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('isLogin')
-  localStorage.removeItem('userId')
-  router.push('/login')
-}
 </script>
 
 <style scoped>
@@ -111,11 +104,10 @@ a {
   color: inherit;
 }
 .wode-zhanghao-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  background: transparent;
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 25px 20px;
   box-sizing: border-box;
-  position: relative;
 }
 
 .zhanghao-card {
@@ -204,6 +196,12 @@ a {
   overflow: hidden;
   box-shadow: var(--shadow, 0 4px 15px rgba(0, 0, 0, 0.04));
   transition: background 0.3s, box-shadow 0.3s;
+}
+
+.menu-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
 }
 
 .menu-item {

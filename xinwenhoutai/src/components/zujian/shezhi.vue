@@ -1,7 +1,7 @@
 <template>
   <div class="settings-page">
     
-    <div v-show="route.path === '/shezhi'">
+    <div>
       <div class="settings-card">
         <div class="header-box">
           <div class="icon-box">
@@ -31,23 +31,21 @@
     </div>
 
     
-    <router-view />
+
   </div>
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
 import useStore from "../pinia";
 
-const route = useRoute()
 const store = useStore();
 
 const shezhiList = [
-  { path: '/shezhi/zhanghao', icon: '👤', text: '我的账号' },
-  { path: '/shezhi/zhuti', icon: '🎨', text: '主题设置' },
-  { path: '/shezhi/tongzhi', icon: '🔔', text: '消息通知' },
-  { path: '/shezhi/beifen', icon: '💾', text: '数据备份' },
-  { path: '/shezhi/xitong', icon: 'ℹ️', text: '关于系统' },
+  { path: '/zhanghao', icon: '👤', text: '我的账号' },
+  { path: '/zhuti', icon: '🎨', text: '主题设置' },
+  { path: '/tongzhi', icon: '🔔', text: '消息通知' },
+  { path: '/beifen', icon: '💾', text: '数据备份' },
+  { path: '/xitong', icon: 'ℹ️', text: '关于系统' },
 ];
 </script>
 

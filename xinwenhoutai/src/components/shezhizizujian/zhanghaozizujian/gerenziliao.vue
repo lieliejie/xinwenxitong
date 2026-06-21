@@ -3,15 +3,14 @@
     <div class="card">
       <div class="header-box">
         <div class="icon-box">
-          <img v-if="formData.avatar" :src="avatarSrc" class="avatar-img" />
-          <span v-else class="icon">👤</span>
+          <img :src="avatarSrc" class="avatar-img" />
         </div>
         <div class="header-info">
           <h3>个人资料</h3>
           <p>查看与修改个人信息</p>
         </div>
       </div>
-      <span class="close-btn" @click="router.back()" title="返回">✕</span>
+      <span class="close-btn" @click="router.push('/zhanghao')" title="返回">✕</span>
     </div>
 
     <div class="form-wrapper">
@@ -50,7 +49,7 @@
 
       <div class="btn-group">
         <button class="btn save-btn" @click="baocun">保存修改</button>
-        <button class="btn back-btn" @click="router.back()">返回</button>
+        <button class="btn back-btn" @click="router.push('/zhanghao')">返回</button>
       </div>
     </div>
   </div>
@@ -143,9 +142,9 @@ onMounted(async () => {
 
 <style scoped>
 .gerenziliao-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  background: transparent;
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 25px 20px;
 }
 
 .card {

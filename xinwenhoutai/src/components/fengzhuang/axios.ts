@@ -18,11 +18,14 @@ http.interceptors.request.use(
 
 http.interceptors.response.use(
   (response) => {
-    console.log('请求成功:', response.status)
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
+    // 只有非公开接口的 401 才跳转登录页
+    const publicPaths = ['/api/home-stats', '/api/tongji-data', '/api/news-detail'];
+    const isPublicApi = error.config && publicPaths.some(p => error.config.url && error.config.url.includes(p));
+    
+    if (error.response?.status === 401 && !isPublicApi) {
       localStorage.removeItem('token');
       localStorage.removeItem('username');
       window.location.href = '/#/login';

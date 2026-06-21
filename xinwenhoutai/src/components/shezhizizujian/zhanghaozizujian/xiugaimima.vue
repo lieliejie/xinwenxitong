@@ -10,7 +10,7 @@
           <p>修改当前账号密码</p>
         </div>
       </div>
-      <span class="close-btn" @click="router.push('/zhanghao')" title="返回">✕</span>
+      <span class="close-btn" @click="router.back()" title="返回">✕</span>
     </div>
 
     <div class="form-wrapper">
@@ -61,7 +61,7 @@
 
       <div class="button">
         <button class="btn save" :disabled="baocunzhong" @click="baocun">{{ baocunzhong ? '保存中...' : '保存修改' }}</button>
-        <button class="btn back" @click="router.push('/shezhi/zhanghao')">返回</button>
+        <button class="btn back" @click="router.back()">返回</button>
       </div>
     </div>
   </div>

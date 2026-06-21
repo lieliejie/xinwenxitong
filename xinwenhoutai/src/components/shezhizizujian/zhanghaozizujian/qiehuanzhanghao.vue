@@ -10,14 +10,14 @@
           <p>退出当前账号并重新登录</p>
         </div>
       </div>
-      <span class="close-btn" @click="router.push('/zhanghao')" title="返回">✕</span>
+      <span class="close-btn" @click="router.back()" title="返回">✕</span>
     </div>
 
     <div class="form-wrapper">
       <p class="confirm-text">切换账号将退出当前登录，你需要重新输入账号密码。</p>
       <div class="btn-group">
         <button class="btn confirm-btn" @click="switchAccount">确认切换</button>
-        <button class="btn back-btn" @click="router.push('/shezhi/zhanghao')">取消</button>
+        <button class="btn back-btn" @click="router.back()">取消</button>
       </div>
     </div>
   </div>

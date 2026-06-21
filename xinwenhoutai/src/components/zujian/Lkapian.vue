@@ -1,36 +1,49 @@
 <template>
   <div class="page-container">
     
-    <div class="card-group">
-      <router-link
-          :to="{path:'/news'}"
-        > 
-      <div class="stat-card">
+    <!-- 加载骨架屏 -->
+    <div v-if="loading" class="card-group">
+      <div v-for="i in 4" :key="'skel-' + i" class="stat-card stat-skeleton">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-content">
+          <div class="skeleton-label"></div>
+          <div class="skeleton-value"></div>
+        </div>
+      </div>
+    </div>
+    <!-- 加载失败 -->
+    <div v-else-if="loadError" class="stats-error">
+      <span>⚠️ 数据加载失败</span>
+      <button class="retry-btn" @click="fetchData">重试</button>
+    </div>
+    <!-- 正常数据 -->
+    <div v-else class="card-group">
+      <div class="stat-card" @click="goToRoute('/news')">
         <div class="card-icon green">📰</div>
         <div class="card-content">
           <div class="card-label">总新闻稿件</div>
-          <div class="card-value">{{ store.dataList.length }}</div>
-        </div></div>
-      </router-link>
-      <div class="stat-card">
+          <div class="card-value">{{ formatNum(stats.totalNews) }}</div>
+        </div>
+      </div>
+      <div class="stat-card" @click="goToRoute('/news')">
         <div class="card-icon green">✍️</div>
         <div class="card-content">
           <div class="card-label">今日发布</div>
-          <div class="card-value">28</div>
+          <div class="card-value">{{ formatNum(stats.todayPublished) }}</div>
         </div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" @click="goToRoute('/news')">
         <div class="card-icon orange">⏳</div>
         <div class="card-content">
           <div class="card-label">待审核稿件</div>
-          <div class="card-value">12</div>
+          <div class="card-value">{{ formatNum(stats.pendingReview) }}</div>
         </div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" @click="goToRoute('/tongji')">
         <div class="card-icon green">👁️</div>
         <div class="card-content">
           <div class="card-label">总阅读量</div>
-          <div class="card-value">128,560</div>
+          <div class="card-value">{{ formatNum(stats.totalViews) }}</div>
         </div>
       </div>
     </div>
@@ -41,19 +54,18 @@
       <div class="section-card">
         <div class="section-header">
           <span class="section-title">📅 最近发布</span>
-          <span class="section-more">查看全部 →</span>
+          <span class="section-more" @click="goToRoute('/news')">查看全部 →</span>
         </div>
         <div class="news-list">
           <div v-for="item in recentNews" :key="item.id" class="news-item">
             <div class="news-title">{{ item.title }}</div>
             <div class="news-meta">
               <span class="meta-item">📝 {{ item.author }}</span>
-              <span class="meta-item">🕐 {{ item.time }}</span>
-              <span class="meta-tag" :class="item.status === '已发布' ? 'tag-green' : 'tag-orange'">
-                {{ item.status }}
-              </span>
+              <span class="meta-item">🕐 {{ item.date }}</span>
+              <span class="meta-tag tag-green">{{ item.status }}</span>
             </div>
           </div>
+          <div v-if="recentNews.length === 0" class="empty-tip">暂无发布数据</div>
         </div>
       </div>
 
@@ -61,7 +73,7 @@
       <div class="section-card">
         <div class="section-header">
           <span class="section-title">🔥 热门新闻TOP5</span>
-          <span class="section-more">查看排行 →</span>
+          <span class="section-more" @click="goToRoute('/news')">查看排行 →</span>
         </div>
         <div class="hot-list">
           <div v-for="(item, index) in hotNews" :key="item.id" class="hot-item">
@@ -71,6 +83,7 @@
               <div class="hot-views">👁️ {{ item.views.toLocaleString() }} 阅读</div>
             </div>
           </div>
+          <div v-if="hotNews.length === 0" class="empty-tip">暂无热度数据</div>
         </div>
       </div>
     </div>
@@ -78,26 +91,73 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import useStore from '../pinia';
-let store = useStore()
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { http } from '../fengzhuang/axios.ts'
 
-const recentNews = ref([
-  { id: 1, title: '我市召开2026年度新闻工作会议', author: '张三', time: '10分钟前', status: '已发布' },
-  { id: 2, title: '乡村振兴战略实施成效显著', author: '李四', time: '30分钟前', status: '已发布' },
-  { id: 3, title: '智慧城市建设项目正式启动', author: '王五', time: '1小时前', status: '待审核' },
-  { id: 4, title: '文化旅游节吸引游客突破10万', author: '赵六', time: '2小时前', status: '已发布' },
-  { id: 5, title: '科技创新大赛获奖名单公示', author: '钱七', time: '3小时前', status: '已发布' }
-])
+const router = useRouter()
 
+// 格式化大数字
+const formatNum = (n: number): string => {
+  if (n >= 10000) {
+    return (n / 10000).toFixed(n % 10000 === 0 ? 0 : 1) + '万'
+  }
+  return n.toLocaleString()
+}
 
-const hotNews = ref([
-  { id: 1, title: '突发！我市迎来强降雨天气', views: 28560 },
-  { id: 2, title: '2026年高考政策最新解读', views: 21340 },
-  { id: 3, title: '地铁3号线预计年底通车', views: 18920 },
-  { id: 4, title: '老旧小区改造工程全面推进', views: 15670 },
-  { id: 5, title: '本地特色农产品展销会开幕', views: 12450 }
-])
+// 路由跳转
+const goToRoute = (path: string) => {
+  if (path) {
+    router.push(path)
+  }
+}
+
+// 统计数据
+const stats = reactive({
+  totalNews: 0,
+  todayPublished: 0,
+  pendingReview: 0,
+  totalViews: 0
+})
+
+// 最近发布列表
+const recentNews = ref([])
+
+// 热门新闻TOP5
+const hotNews = ref([])
+
+// 加载状态
+const loading = ref(true)
+const loadError = ref(false)
+
+// 获取数据
+const fetchData = async () => {
+  loading.value = true
+  loadError.value = false
+  try {
+    const res = await http.get('/api/tongji-data')
+    if (res.data && res.data.code === 200) {
+      const d = res.data.data
+      stats.totalNews = d.totalNews || 0
+      stats.todayPublished = d.todayPublished || 0
+      stats.pendingReview = d.pendingReview || 0
+      stats.totalViews = d.totalViews || 0
+      recentNews.value = d.recentNews || []
+      hotNews.value = d.hotNews || []
+    } else {
+      loadError.value = true
+    }
+  } catch (err) {
+    console.error('获取统计页面数据失败:', err)
+    loadError.value = true
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchData()
+})
 </script>
 
 <style scoped>
@@ -131,6 +191,13 @@ a{
   align-items: center;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
 .card-icon.green {
@@ -316,5 +383,81 @@ a{
 .hot-views {
   font-size: 12px;
   color: #999;
+}
+
+/* 骨架屏 */
+.stat-skeleton {
+  cursor: default;
+  pointer-events: none;
+}
+.skeleton-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+.skeleton-content {
+  flex: 1;
+}
+.skeleton-label {
+  width: 50%;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  margin-bottom: 8px;
+}
+.skeleton-value {
+  width: 70%;
+  height: 24px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* 错误提示 */
+.stats-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 30px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  color: #999;
+  font-size: 14px;
+}
+.retry-btn {
+  padding: 4px 16px;
+  border: 1px solid #07c160;
+  border-radius: 4px;
+  background: #fff;
+  color: #07c160;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.retry-btn:hover {
+  background: #07c160;
+  color: #fff;
+}
+
+/* 空数据提示 */
+.empty-tip {
+  text-align: center;
+  color: #bbb;
+  font-size: 14px;
+  padding: 20px 0;
 }
 </style>

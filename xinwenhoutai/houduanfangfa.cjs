@@ -118,7 +118,7 @@ server.get('/', (req, res) => {
 // ================= 收 token 并验证的中间件 =================
 server.use((req, res, next) => {
   // 放行：静态文件、登录注册、上传、评论等公开接口
-  if (req.path === '/api/login' || req.path === '/api/register' || req.path === '/api/upload-avatar' || req.path === '/api/upload-tupian' || req.path.startsWith('/uploads/') || req.path === '/api/dianzan' || req.path === '/api/shoucang' || req.path === '/api/dianzan-status' || req.path === '/api/shoucang-status' || req.path === '/api/pinglun' || req.path.startsWith('/api/pinglun/') || req.path === '/api/home-stats' || req.path.startsWith('/qiantai') || req.path.startsWith('/houtai') || req.path === '/' || req.path.endsWith('.js') || req.path.endsWith('.css') || req.path.endsWith('.html') || req.path.endsWith('.png') || req.path.endsWith('.jpg') || req.path.endsWith('.svg') || req.path.endsWith('.ico') || req.path.endsWith('.woff') || req.path.endsWith('.woff2')) {
+  if (req.path === '/api/login' || req.path === '/api/register' || req.path === '/api/upload-avatar' || req.path === '/api/upload-tupian' || req.path.startsWith('/uploads/') || req.path === '/api/dianzan' || req.path === '/api/shoucang' || req.path === '/api/dianzan-status' || req.path === '/api/shoucang-status' || req.path === '/api/pinglun' || req.path.startsWith('/api/pinglun/') || req.path === '/api/home-stats' || req.path === '/api/tongji-data' || req.path.startsWith('/qiantai') || req.path.startsWith('/houtai') || req.path === '/' || req.path.endsWith('.js') || req.path.endsWith('.css') || req.path.endsWith('.html') || req.path.endsWith('.png') || req.path.endsWith('.jpg') || req.path.endsWith('.svg') || req.path.endsWith('.ico') || req.path.endsWith('.woff') || req.path.endsWith('.woff2')) {
     return next()
   }
 
@@ -436,6 +436,62 @@ server.get('/api/home-stats', (req, res) => {
     })
   } catch (err) {
     console.error('获取统计数据失败:', err)
+    res.status(500).json({ code: 500, message: '服务器内部错误' })
+  }
+})
+
+// ================= 数据统计页面接口 =================
+server.get('/api/tongji-data', (req, res) => {
+  try {
+    const zhongzhuan = router.db.get('zhongzhuanshuju').value() || []
+    const zhanshi = router.db.get('zhanshishuju').value() || []
+    const bohui = router.db.get('bohuishuju').value() || []
+
+    // 合并所有新闻用于总统计
+    const allNews = [...zhongzhuan, ...zhanshi, ...bohui]
+
+    // 今日发布（按日期筛选当天发布的）
+    const today = new Date().toISOString().split('T')[0] // e.g. "2026-06-21"
+    const todayPublished = zhanshi.filter(item => item.riQi === today).length
+
+    // 总阅读量
+    const totalViews = allNews.reduce((sum, item) => sum + (item.yueduLiang || 0), 0)
+
+    // 最近发布（从已发布新闻按 riQi 倒序取前5条）
+    const recentNews = zhanshi
+      .sort((a, b) => new Date(b.riQi) - new Date(a.riQi))
+      .slice(0, 5)
+      .map(item => ({
+        id: item.id,
+        title: item.biaoTi,
+        author: item.laiYuan,
+        date: item.riQi,
+        status: '已发布'
+      }))
+
+    // 热门新闻TOP5（按阅读量降序，从所有新闻中取）
+    const hotNews = allNews
+      .sort((a, b) => (b.yueduLiang || 0) - (a.yueduLiang || 0))
+      .slice(0, 5)
+      .map(item => ({
+        id: item.id,
+        title: item.biaoTi,
+        views: item.yueduLiang || 0
+      }))
+
+    res.json({
+      code: 200,
+      data: {
+        totalNews: zhanshi.length,      // 总新闻稿件
+        todayPublished,                  // 今日发布
+        pendingReview: zhongzhuan.length, // 待审核稿件
+        totalViews,                      // 总阅读量
+        recentNews,                      // 最近发布列表
+        hotNews                          // 热门新闻TOP5
+      }
+    })
+  } catch (err) {
+    console.error('获取统计页面数据失败:', err)
     res.status(500).json({ code: 500, message: '服务器内部错误' })
   }
 })

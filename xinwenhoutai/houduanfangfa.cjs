@@ -44,10 +44,6 @@ if (fs.existsSync(houtaiDist)) {
   if (fs.existsSync(assetsDir)) {
     console.log('📂 dist/assets 内容:', fs.readdirSync(assetsDir).join(', '))
   }
-} else {
-  console.log('❌ 后台 dist 目录不存在! 路径:', houtaiDist)
-  console.log('📂 当前目录内容:', fs.readdirSync(__dirname).join(', '))
-}
 
   // 先注册静态文件中间件
   server.use('/houtai', require('express').static(houtaiDist, {
@@ -79,6 +75,9 @@ if (fs.existsSync(houtaiDist)) {
       next()
     }
   })
+} else {
+  console.log('❌ 后台 dist 目录不存在! 路径:', houtaiDist)
+  console.log('📂 当前目录内容:', fs.readdirSync(__dirname).join(', '))
 }
 
 // ================= 托管前台展示前端 =================

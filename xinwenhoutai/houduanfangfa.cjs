@@ -37,6 +37,8 @@ if (fs.existsSync(houtaiDist)) {
   const assetsDir = path.join(houtaiDist, 'assets')
   const assetsCount = fs.existsSync(assetsDir) ? fs.readdirSync(assetsDir).length : 0
   console.log('✅ 后台 dist 目录存在，assets 文件数: ' + assetsCount)
+
+  // 先注册静态文件中间件
   server.use('/houtai', require('express').static(houtaiDist, {
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.js')) {
@@ -48,16 +50,22 @@ if (fs.existsSync(houtaiDist)) {
       }
     }
   }))
-  // SPA 路由 fallback：只对非静态资源请求返回 index.html
-  server.get('/houtai/*', (req, res) => {
-    const reqPath = req.path.replace('/houtai', '')
-    const filePath = path.join(houtaiDist, reqPath)
-    // 如果请求的是存在的静态文件，express.static 已经处理了，这里只处理 SPA 路由
-    if (!fs.existsSync(filePath) && !reqPath.startsWith('/assets/')) {
-      res.sendFile(path.join(houtaiDist, 'index.html'))
-    } else if (!res.headersSent) {
-      // 文件存在但 static 没处理（极端情况），手动返回
-      res.sendFile(filePath)
+
+  // SPA fallback：只有请求路径对应不到静态文件时才返回 index.html
+  server.use('/houtai', (req, res, next) => {
+    // 排除 assets 和明确的静态文件请求（它们由 express.static 处理，不存在就 404）
+    const reqPath = req.path.replace(/^\/houtai/, '') || '/'
+    // 如果是 assets 目录下的文件，express.static 找不到就让它 404，不要 fallback
+    if (reqPath.startsWith('/assets/')) {
+      // express.static 没处理说明文件不存在，返回 404
+      return res.status(404).send('Not Found')
+    }
+    // 其他路径（SPA 路由），返回 index.html
+    const indexPath = path.join(houtaiDist, 'index.html')
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath)
+    } else {
+      next()
     }
   })
 }
@@ -76,13 +84,16 @@ if (fs.existsSync(qiantaiDist)) {
       }
     }
   }))
-  server.get('/qiantai/*', (req, res) => {
-    const reqPath = req.path.replace('/qiantai', '')
-    const filePath = path.join(qiantaiDist, reqPath)
-    if (!fs.existsSync(filePath) && !reqPath.startsWith('/assets/')) {
-      res.sendFile(path.join(qiantaiDist, 'index.html'))
-    } else if (!res.headersSent) {
-      res.sendFile(filePath)
+  server.use('/qiantai', (req, res, next) => {
+    const reqPath = req.path.replace(/^\/qiantai/, '') || '/'
+    if (reqPath.startsWith('/assets/')) {
+      return res.status(404).send('Not Found')
+    }
+    const indexPath = path.join(qiantaiDist, 'index.html')
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath)
+    } else {
+      next()
     }
   })
 } else {

@@ -118,7 +118,7 @@ const getImgArr = (pic) => {
   width: 100%;
   display: flex;
   gap: 20px;
-  padding: 10px 0;
+  padding: 20px 0;
   border-bottom: 1px solid var(--border-color);
   cursor: pointer;
   transition:  ease-in-out 0.2s;
@@ -225,6 +225,7 @@ const getImgArr = (pic) => {
 .news-card-multi{
   display: flex;
   flex-direction: column;
+  padding: 20px 0;
  border-top: 1px solid var(--border-color);
 }
 .news-card-multi a {

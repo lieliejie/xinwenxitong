@@ -355,6 +355,23 @@ server.delete('/api/pinglun/:id', (req, res) => {
   return res.json({ code: 200, message: '删除成功' })
 })
 
+// ================= 路由别名：前端请求路径 → 数据库表名 =================
+const dbAliases = {
+  '/zhanshidataList': '/zhanshishuju',
+  '/rejectedList': '/bohuishuju'
+}
+
+Object.entries(dbAliases).forEach(([from, to]) => {
+  server.use(from, (req, res, next) => {
+    req.url = to + req.url.slice(from.length)
+    next()
+  })
+  server.use('/api' + from, (req, res, next) => {
+    req.url = '/api' + to + req.url.slice(('/api' + from).length)
+    next()
+  })
+})
+
 // ================= 其他请求走 json-server =================
 server.use('/api', router)
 

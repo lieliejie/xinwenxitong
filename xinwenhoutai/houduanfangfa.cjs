@@ -356,16 +356,15 @@ server.delete('/api/pinglun/:id', (req, res) => {
 })
 
 // ================= 路由别名：前端请求路径 → 数据库表名 =================
-// 前端请求 /api/zhanshidataList → 实际 /api/zhanshishuju
-// 前端请求 /api/rejectedList → 实际 /api/bohuishuju
+// 前端请求 /zhanshidataList → /zhanshishuju
+// 前端请求 /rejectedList → /bohuishuju
 
-server.use('/api/zhanshidataList', (req, res, next) => {
-  req.url = '/api/zhanshishuju' + req.url
-  next()
-})
-
-server.use('/api/rejectedList', (req, res, next) => {
-  req.url = '/api/bohuishuju' + req.url
+server.use((req, res, next) => {
+  if (req.path.startsWith('/zhanshidataList')) {
+    req.url = '/zhanshishuju' + req.url.slice('/zhanshidataList'.length)
+  } else if (req.path.startsWith('/rejectedList')) {
+    req.url = '/bohuishuju' + req.url.slice('/rejectedList'.length)
+  }
   next()
 })
 

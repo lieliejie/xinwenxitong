@@ -356,22 +356,17 @@ server.delete('/api/pinglun/:id', (req, res) => {
 })
 
 // ================= 路由别名：前端请求路径 → 数据库表名 =================
-const dbAliases = {
-  '/zhanshidataList': '/zhanshishuju',
-  '/rejectedList': '/bohuishuju'
-}
+// 前端请求 /api/zhanshidataList → 实际 /api/zhanshishuju
+// 前端请求 /api/rejectedList → 实际 /api/bohuishuju
 
-Object.entries(dbAliases).forEach(([from, to]) => {
-  // 不带 /api 前缀的别名
-  server.use(from, (req, res, next) => {
-    req.url = to + req.url.slice(from.length)
-    next()
-  })
-  // 带 /api 前缀的别名
-  server.use('/api' + from, (req, res, next) => {
-    req.url = '/api' + to + req.url.slice(('/api' + from).length)
-    next()
-  })
+server.use('/api/zhanshidataList', (req, res, next) => {
+  req.url = '/api/zhanshishuju' + req.url
+  next()
+})
+
+server.use('/api/rejectedList', (req, res, next) => {
+  req.url = '/api/bohuishuju' + req.url
+  next()
 })
 
 // ================= 其他请求走 json-server =================
